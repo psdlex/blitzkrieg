@@ -1,0 +1,25 @@
+#pragma once
+#ifndef PROGRESS_DESCRIPTOR_NODE_HPP
+#define PROGRESS_DESCRIPTOR_NODE_HPP
+
+#include <Geode/Geode.hpp>
+#include "../../utils/SettingsUtil.hpp"
+
+using namespace geode::prelude;
+
+typedef SettingsUtils::ProgressionSettingsFlags PSFlags;
+
+class ProgressDescriptorNode : public CCNode
+{
+protected:
+    CCMenu* m_rootMenu;
+
+private:
+    bool init(const matjson::Value* settings, float width);
+    std::vector<std::pair<std::string, float>> createVector(PSFlags flags);
+
+public:
+    static ProgressDescriptorNode* create(const matjson::Value* settings, float width);
+};
+
+#endif // PROGRESS_DESCRIPTOR_NODE_HPP

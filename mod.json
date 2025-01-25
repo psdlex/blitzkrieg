@@ -1,0 +1,94 @@
+{
+	"geode": "4.2.0",
+	"gd": {
+		"win": "2.2074",
+		"android": "2.2074",
+		"mac": "2.2074",
+		"ios": "2.2074"
+	},
+	"id": "lexpsd.blitzkrieg",
+	"name": "Blitzkrieg",
+	"version": "v1.0.0",
+	"developer": "lexpsd",
+	"description": "Free version of the mod made for convenient progression in any level you have a commitment to beat or to set progresses on! Inspired and based on Rudder's progression method named \"Blitzkrieg\"!",
+
+	"resources": {
+		"spritesheets": {
+			"BlitzKrieg": [
+				"resources/*.png"
+			]
+		}
+	},
+
+	"dependencies": [
+		{
+			"id": "cvolton.level-id-api",
+			"version": "v1.0.0",
+			"importance": "required"
+		}
+	],
+
+	"settings": {
+		"progression-table-settings": {
+			"type": "title",
+			"name": "Progression Table Settings"
+		},
+
+		"show-best-run": {
+			"type": "bool",
+			"default": true,
+			"name": "Show Best-Run",
+			"description": "If enabled - shows the best run from certain percentage in an Active Stage"
+		},
+
+		"show-attempts-for-progress": {
+			"type": "bool",
+			"default": true,
+			"name": "Show Attempts for Progress",
+			"description": "If enabled - shows how many attempts you had in the current level when certain progress was set in an Active Stage"
+		},
+
+		"show-pass-amount": {
+			"type": "bool",
+			"default": true,
+			"name": "Show Pass Amount",
+			"description": "If enabled - shows how many times was a certain progress passed in an Active Stage"
+		},
+
+		"enable-auto-checker": {
+			"type": "bool",
+			"default": true,
+			"name": "Enable Auto-Checker",
+			"description": "If enabled - automatically checks the Check-Box for a certain progress in an Active Stage. It does NOT check the progress that is shorter if you passed it, so if you need to include shorter progresses, make sure you check it by yourself!\n\nFor example, if you have progresses: ..60-70, 50-60.., if you pass 50-70, then 50-60 will be CHECKED, but 60-70 WILL NOT, be aware!"
+		},
+
+		"rudder-settings": {
+			"type": "title",
+			"name": "Rudder-Related Settings"
+		},
+
+		"rudder-nickname": {
+			"type": "string",
+			"name": "Name for Rudder",
+			"default": "",
+			"description": "Name that will be displayed in a progress report to Rudder",
+			"requires-restart": false
+		},
+
+		"rudder-color": {
+			"type": "rgba",
+			"name": "Your Message's Color",
+			"description": "Color that will be displayed alongside your Name in a progress report to Rudder",
+			"default": [ 255, 255, 255, 255 ]
+		},
+
+		"rudder-frequency": {
+			"name": "Send Progress to Rudder",
+			"description": "Do you want Rudder to watch your progress? Set-up the frequency!",
+			"type": "string",
+			"requires-restart": false,
+			"default": "Dont Send",
+			"one-of": [ "Dont Send", "Every 30 Minutes", "Every 60 Minutes", "Every 3 Hours", "Every 6 Hours", "Every 12 Hours", "Every 24 Hours" ]
+		}
+	}
+}
