@@ -255,7 +255,7 @@ void ProgressionTablePopup::parseProgression(const std::string text)
     m_progression->m_stages = stages;
     m_progression->m_stages[0].m_isActive = true;
 
-    m_scrollLayerPositionY = -1; // discarding
+    m_scrollLayerPositionY = std::nullopt; // discarding
 }
 
 void ProgressionTablePopup::loadProgression()
@@ -270,10 +270,10 @@ void ProgressionTablePopup::loadProgression()
     
     m_stagesScrollLayer->m_contentLayer->updateLayout();
 
-    if (m_scrollLayerPositionY == -1) {
+    if (m_scrollLayerPositionY == std::nullopt) {
         ScrollUtil::scrollToTop(m_stagesScrollLayer);
     } else {
-        ScrollUtil::scrollToPosition(m_stagesScrollLayer, static_cast<uint32_t>(m_scrollLayerPositionY));
+        ScrollUtil::scrollToPosition(m_stagesScrollLayer, m_scrollLayerPositionY.value());
     }
 }
 
@@ -294,12 +294,9 @@ ProgressionTablePopup* ProgressionTablePopup::create(LevelProgression* progressi
     return nullptr;
 }
 
-void ProgressionTablePopup::onExit()
+void ProgressionTablePopup::onClose(CCObject* x)
 {
-    log::debug("vro woooooork");
-    log::debug("{}", m_stagesScrollLayer->m_contentLayer->getPositionY());
-    log::debug("{}", m_stagesScrollLayer == nullptr);
-    log::debug("{}", m_stagesScrollLayer->m_contentLayer == nullptr);
     m_scrollLayerPositionY = m_stagesScrollLayer->m_contentLayer->getPositionY();
-    Popup::onExit();
+    log::info("{}", m_scrollLayerPositionY);
+    Popup::onClose(x);
 }

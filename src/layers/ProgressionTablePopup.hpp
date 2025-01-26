@@ -23,14 +23,14 @@ class ProgressionTablePopup : public geode::Popup<LevelProgression*> {
     CCLabelBMFont* m_noProgressLabel;
 
     TextInput* m_percentageInput;
-    Ref<ScrollLayer> m_stagesScrollLayer;
+    ScrollLayer* m_stagesScrollLayer;
 
     // statics
-    static int32_t m_scrollLayerPositionY;
+    static std::optional<int32_t> m_scrollLayerPositionY;
 
 protected:
     bool setup(LevelProgression* value) override;
-    void onExit();
+    void onClose(CCObject* x) override;
 
     void parseProgression(const std::string text);
     void loadProgression();
@@ -51,6 +51,6 @@ public:
     static ProgressionTablePopup* create(LevelProgression* progression);
 };
 
-inline int32_t ProgressionTablePopup::m_scrollLayerPositionY = -1;
+inline std::optional<int32_t> ProgressionTablePopup::m_scrollLayerPositionY = std::nullopt;
 
 #endif // PROGRESSION_TABLE_POPUP_HPP

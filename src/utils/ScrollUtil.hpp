@@ -18,7 +18,7 @@ public:
         scrollLayer->m_contentLayer->setPositionY(0);
     }
 
-    static void scrollToPosition(const geode::ScrollLayer* scrollLayer, uint32_t position)
+    static void scrollToPosition(const geode::ScrollLayer* scrollLayer, int32_t position)
     {
         scrollLayer->m_contentLayer->setPositionY(position);
     }
