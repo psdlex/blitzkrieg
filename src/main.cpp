@@ -21,12 +21,15 @@ using namespace geode::prelude;
 
 $on_mod(Loaded)
 {
-    auto init = LevelProgressionManager::init();
-    if (!init.isOk())
-    {
-        log::error("ERROR WHILE INITIALIZING: {0}", init.unwrapErr());
-        return;
+    auto lpmInit = LevelProgressionManager::init();
+    auto puInit = PathUtil::init();
+    if (!lpmInit.isOk()) {
+        log::error("ERROR WHILE INITIALIZING: {0}", lpmInit.unwrapErr());
     }
-
-    log::info("BLITZKRIEG FULLY LOADED");
+    else if (!puInit.isOk()) {
+        log::error("ERROR WHILE INITIALIZING: {0}", puInit.unwrapErr());
+    }
+    else {
+        log::info("BLITZKRIEG FULLY LOADED");
+    }
 }

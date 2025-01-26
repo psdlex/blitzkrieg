@@ -1,6 +1,7 @@
 #include <regex>
 #include "../utils/ProgressionStageUtil.hpp"
 #include "../utils/StringUtil.hpp"
+#include "../utils/ScrollUtil.hpp"
 #include "../layers/ProgressionTablePopup.hpp"
 #include "../defines/ProgressionTable.hpp"
 #include "../defines/Fonts.hpp"
@@ -184,13 +185,14 @@ void ProgressionTablePopup::setupProgressList()
     loadProgression();
 }
 
+
 void ProgressionTablePopup::onFindStartPoses(CCObject*)
 {
     if (m_progression->m_startPosPercents.size() < 1) {
         static_cast<BKPlayLayer*>(BKPlayLayer::get())->playThroughoutStartposes(m_progression);
     }
 
-    auto joined = StringUtil::get()->joinVector(m_progression->m_startPosPercents, ",");
+    auto joined = StringUtil::joinVector(m_progression->m_startPosPercents, ",");
     m_percentageInput->setString(joined);
 }
 
@@ -228,6 +230,7 @@ void ProgressionTablePopup::onApplySearch(CCObject*)
     }
 }
 
+
 void ProgressionTablePopup::parseProgression(const std::string text)
 {
     std::set<uint32_t> parsed;
@@ -243,31 +246,37 @@ void ProgressionTablePopup::parseProgression(const std::string text)
     {
         auto split = geode::utils::string::split(text, ",");
         std::transform(split.begin(), split.end(), std::inserter(parsed, parsed.end()), [](const std::string& str)
-        {\
+        {
             return geode::utils::numFromString<uint32_t>(str).unwrapOr(0);
         });
     }
 
-    auto stages = ProgressionStageUtil::get()->createStages(&parsed);
+    auto stages = ProgressionStageUtil::createStages(&parsed);
     m_progression->m_stages = stages;
     m_progression->m_stages[0].m_isActive = true;
+
+    m_scrollLayerPositionY = -1; // discarding
 }
 
-
 void ProgressionTablePopup::loadProgression()
-{
-    auto settings = Mod::get()->getSavedSettingsData();
-
+{    
     m_noProgressLabel->setVisible(m_progression->m_stages.size() < 1);
     m_stagesScrollLayer->m_contentLayer->removeAllChildren();
     for (auto& stage : m_progression->m_stages)
     {
-        auto item = StageNode::create(&stage, &settings, m_stagesScrollLayer->m_contentLayer->getContentWidth());
+        auto item = StageNode::create(&stage, m_stagesScrollLayer->m_contentLayer->getContentWidth());
         m_stagesScrollLayer->m_contentLayer->addChild(item);
     }
     
     m_stagesScrollLayer->m_contentLayer->updateLayout();
+
+    if (m_scrollLayerPositionY == -1) {
+        ScrollUtil::scrollToTop(m_stagesScrollLayer);
+    } else {
+        ScrollUtil::scrollToPosition(m_stagesScrollLayer, static_cast<uint32_t>(m_scrollLayerPositionY));
+    }
 }
+
 
 bool ProgressionTablePopup::hasInvalidCharacters(const std::string str) {
     std::regex validPattern("^[0-9,]*$");
@@ -275,13 +284,22 @@ bool ProgressionTablePopup::hasInvalidCharacters(const std::string str) {
 }
 
 ProgressionTablePopup* ProgressionTablePopup::create(LevelProgression* progression) {
-
     auto popup = new ProgressionTablePopup();
     if (popup->initAnchored(POPUP_SIZE_W, POPUP_SIZE_H, progression, WHITE_SQUARE_SPRITE)) {
         popup->autorelease();
         return popup;
     }
-
+    
     delete popup;
     return nullptr;
+}
+
+void ProgressionTablePopup::onExit()
+{
+    log::debug("vro woooooork");
+    log::debug("{}", m_stagesScrollLayer->m_contentLayer->getPositionY());
+    log::debug("{}", m_stagesScrollLayer == nullptr);
+    log::debug("{}", m_stagesScrollLayer->m_contentLayer == nullptr);
+    m_scrollLayerPositionY = m_stagesScrollLayer->m_contentLayer->getPositionY();
+    Popup::onExit();
 }

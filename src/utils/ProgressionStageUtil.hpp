@@ -5,14 +5,11 @@
 #include <set>
 #include <algorithm>
 #include "../objects/LevelProgression.hpp"
-#include "../abstraction/SingletonBase.hpp"
 
-class ProgressionStageUtil : public SingletonBase<ProgressionStageUtil>
+class ProgressionStageUtil
 {
-    friend class SingletonBase<ProgressionStageUtil>;
-
 public:
-    std::vector<ProgressionStage> createStages(const std::set<uint32_t>* percents) {
+    static std::vector<ProgressionStage> createStages(const std::set<uint32_t>* percents) {
         std::vector<int> sortedPercents(percents->begin(), percents->end());
         std::sort(sortedPercents.begin(), sortedPercents.end());
 

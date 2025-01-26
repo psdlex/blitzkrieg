@@ -4,13 +4,12 @@
 #include "../../defines/ProgressionStageNode.hpp"
 #include "../../defines/Fonts.hpp"
 
-bool StageNode::init(ProgressionStage* stage, matjson::Value* settings, float width)
+bool StageNode::init(ProgressionStage* stage, float width)
 {
     if (!CCNode::init()) {
         return false;
     }
 
-    m_settings = settings;
     m_progressionStage = stage;
     m_menuWidth = width;
 
@@ -106,18 +105,19 @@ void StageNode::setupStage()
 
 void StageNode::setupProgresses()
 {
-    auto progressDescriptor = ProgressDescriptorNode::create(m_settings, m_menuWidth);
+    auto progressDescriptor = ProgressDescriptorNode::create(m_menuWidth);
     m_progressInfosMenu->addChild(progressDescriptor);
 
     for (auto& progress : m_progressionStage->m_progresses)
     {
-        auto progressNode = ProgressNode::create(&progress, m_settings, m_menuWidth);
+        auto progressNode = ProgressNode::create(&progress, m_menuWidth);
         m_progressInfosMenu->addChild(progressNode);
         m_progressNodes.push_back(progressNode);
     }
 
     m_progressInfosMenu->updateLayout();
 }
+
 
 void StageNode::onStageCheck(CCObject* sender)
 {
@@ -129,10 +129,11 @@ void StageNode::onStageCheck(CCObject* sender)
     m_progressionStage->m_checked = !toggler->m_toggled; // reversing cuz yeah, it takes the value before changing it
 }
 
-StageNode* StageNode::create(ProgressionStage* stage, matjson::Value* settings, float width)
+
+StageNode* StageNode::create(ProgressionStage* stage, float width)
 {
     auto ret = new StageNode();
-    if (ret->init(stage, settings, width)) {
+    if (ret->init(stage, width)) {
         ret->autorelease();  
         return ret;
     }

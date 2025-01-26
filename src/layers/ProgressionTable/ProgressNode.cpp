@@ -1,12 +1,11 @@
 #include "../ProgressionTable/ProgressNode.hpp"
 #include "../../defines/ProgressNode.hpp"
 
-bool ProgressNode::init(ProgressInfo* progressInfo, matjson::Value* settings, float width)
+bool ProgressNode::init(ProgressInfo* progressInfo, float width)
 {
     if (!CCNode::init())
         return false;
 
-    m_settings = settings;
     m_progressInfo = progressInfo;
     setContentSize({ width, PROGRESS_HEIGHT });
 
@@ -31,10 +30,10 @@ bool ProgressNode::init(ProgressInfo* progressInfo, matjson::Value* settings, fl
     return true;
 }
 
-ProgressNode* ProgressNode::create(ProgressInfo* progressInfo, matjson::Value* settings, float width)
+ProgressNode* ProgressNode::create(ProgressInfo* progressInfo, float width)
 {
     auto ret = new ProgressNode();
-    if (ret->init(progressInfo, settings, width)) {
+    if (ret->init(progressInfo, width)) {
         ret->autorelease();  
         return ret;
     }

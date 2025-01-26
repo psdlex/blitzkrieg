@@ -36,6 +36,7 @@
 
 		"show-best-run": {
 			"type": "bool",
+			"requires-restart": false,
 			"default": true,
 			"name": "Show Best-Run",
 			"description": "If enabled - shows the best run from certain percentage in an Active Stage"
@@ -44,6 +45,7 @@
 		"show-attempts-for-progress": {
 			"type": "bool",
 			"default": true,
+			"requires-restart": false,
 			"name": "Show Attempts for Progress",
 			"description": "If enabled - shows how many attempts you had in the current level when certain progress was set in an Active Stage"
 		},
@@ -51,6 +53,7 @@
 		"show-pass-amount": {
 			"type": "bool",
 			"default": true,
+			"requires-restart": false,
 			"name": "Show Pass Amount",
 			"description": "If enabled - shows how many times was a certain progress passed in an Active Stage"
 		},
@@ -58,6 +61,7 @@
 		"enable-auto-checker": {
 			"type": "bool",
 			"default": true,
+			"requires-restart": false,
 			"name": "Enable Auto-Checker",
 			"description": "If enabled - automatically checks the Check-Box for a certain progress in an Active Stage. It does NOT check the progress that is shorter if you passed it, so if you need to include shorter progresses, make sure you check it by yourself!\n\nFor example, if you have progresses: ..60-70, 50-60.., if you pass 50-70, then 50-60 will be CHECKED, but 60-70 WILL NOT, be aware!"
 		},
@@ -78,6 +82,7 @@
 		"rudder-color": {
 			"type": "rgba",
 			"name": "Your Message's Color",
+			"requires-restart": false,
 			"description": "Color that will be displayed alongside your Name in a progress report to Rudder",
 			"default": [ 255, 255, 255, 255 ]
 		},

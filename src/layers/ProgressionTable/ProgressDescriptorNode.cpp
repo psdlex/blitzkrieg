@@ -2,7 +2,7 @@
 #include "../../defines/ProgressNode.hpp"
 #include "../../defines/Fonts.hpp"
 
-bool ProgressDescriptorNode::init(const matjson::Value* settings, float width)
+bool ProgressDescriptorNode::init(float width)
 {
     if (!CCNode::init()) {
         return false;
@@ -13,12 +13,12 @@ bool ProgressDescriptorNode::init(const matjson::Value* settings, float width)
     // root menu
     m_rootMenu = CCMenu::create();
     m_rootMenu->ignoreAnchorPointForPosition(false);
-    m_rootMenu->setContentSize(getContentSize());
+    m_rootMenu->setContentSize(getContentSize() - CCSize({ 10, 0 }));
     m_rootMenu->setAnchorPoint({ 0.5, 0.5 });
     m_rootMenu->setLayout(RowLayout::create()
                            ->setAxisAlignment(AxisAlignment::Between)
                            ->setAutoScale(false)
-                           ->setAxisReverse(true));
+                           ->setAxisReverse(false));
 
     this->addChildAtPosition(m_rootMenu, Anchor::Center);
 
@@ -31,7 +31,7 @@ bool ProgressDescriptorNode::init(const matjson::Value* settings, float width)
     this->addChildAtPosition(background, Anchor::Center);
 
     // descriptors (name/scale)
-    auto descriptors = createVector(SettingsUtils::get()->getProgressionSettings(settings));
+    auto descriptors = createVector(SettingsUtils::getProgressionSettings());
 
     for (auto& descriptor : descriptors)
     {
@@ -54,27 +54,28 @@ std::vector<std::pair<std::string, float>> ProgressDescriptorNode::createVector(
     std::vector<std::pair<std::string, float>> vec = {};
 
     vec.push_back({ "Progress", 0.3 });
-    vec.push_back({ "Passed", 0.3 });
 
-    if (flags & (PSFlags::ShowPassAmount)) {
-        vec.push_back({ "Pass\nAmount", 0.25 });
-    }
-
-    if (flags & (PSFlags::ShowBestRun)) {
+    if ((flags & PSFlags::ShowBestRun) != PSFlags::None) {
         vec.push_back({ "Best Run", 0.3 });
     }
 
-    if (flags & (PSFlags::ShowAttempts)) {
+    if ((flags & PSFlags::ShowPassAmount) != PSFlags::None) {
+        vec.push_back({ "Pass Amount", 0.3 });
+    }
+
+    if ((flags & PSFlags::ShowAttempts) != PSFlags::None) {
         vec.push_back({ "Attempts", 0.3 });
     }
+
+    vec.push_back({ "Passed", 0.3 });
 
     return vec;
 }
 
-ProgressDescriptorNode* ProgressDescriptorNode::create(const matjson::Value* settings, float width)
+ProgressDescriptorNode* ProgressDescriptorNode::create(float width)
 {
     auto ret = new ProgressDescriptorNode();
-    if (ret->init(settings, width)) {
+    if (ret->init(width)) {
         ret->autorelease();  
         return ret;
     }

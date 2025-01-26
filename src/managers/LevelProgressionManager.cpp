@@ -4,7 +4,7 @@
 
 Result<> LevelProgressionManager::init()
 {
-    auto levelFolder = PathUtil::get()->getLevelsFolder();
+    auto levelFolder = PathUtil::getLevelsFolder();
     auto created = file::createDirectory(*levelFolder);
     return created;
 }
@@ -35,7 +35,7 @@ Result<LevelProgression*> LevelProgressionManager::getProgression(GJGameLevel* c
     }
 
     auto levelKey = levelKeyResult.unwrap();
-    auto fullPath = *PathUtil::get()->getLevelsFolder() / (levelKey + ".json");
+    auto fullPath = *PathUtil::getLevelsFolder() / (levelKey + ".json");
     auto levelProgression = file::readFromJson<LevelProgression>(fullPath);
 
     if (!levelProgression.isOk()) {
@@ -68,7 +68,7 @@ Result<LevelProgression*> LevelProgressionManager::createEmptyProgression(GJGame
 
 bool LevelProgressionManager::setProgression(const GJGameLevel* level, const LevelProgression* levelProgression, const gd::string* levelKey)
 {
-    auto fullPath = *PathUtil::get()->getLevelsFolder() / (*levelKey + ".json");
+    auto fullPath = *PathUtil::getLevelsFolder() / (*levelKey + ".json");
     auto result = file::writeToJson(fullPath, *levelProgression);
 
     return result.isOk();

@@ -4,15 +4,12 @@
 
 #include <set>
 #include <string>
-#include "../abstraction/SingletonBase.hpp"
 
-class StringUtil : public SingletonBase<StringUtil>
+class StringUtil
 {
-    friend class SingletonBase<StringUtil>;
-
 public:
     template <typename T>
-    std::string joinVector(const std::vector<T>& vec, const std::string& separator) {
+    static std::string joinVector(const std::vector<T>& vec, const std::string& separator) {
         if (vec.empty()) {
             return "";
         }

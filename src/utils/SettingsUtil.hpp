@@ -3,43 +3,52 @@
 #define SETTINGS_UTIL_HPP
 
 #include <Geode/Geode.hpp>
-#include "../abstraction/SingletonBase.hpp"
 #include "../include/EnumBitmask.hpp"
 
 using namespace geode::prelude;
 
-class SettingsUtils : public SingletonBase<SettingsUtils>
+class SettingsUtils
 {
-    friend class SingletonBase<SettingsUtils>;
-
 public:
-        enum class ProgressionSettingsFlags
-        {
+    enum class ProgressionSettingsFlags
+    {
+        None = 0,
         ShowBestRun = 1,
         ShowAttempts = 2,
-        ShowPassAmount = 4
+        ShowPassAmount = 4,
+        EnableAutoChecker = 8
     };
+    
+    static ProgressionSettingsFlags getProgressionSettings();
 
-    ProgressionSettingsFlags getProgressionSettings(const matjson::Value* settings)
-    {
-        ProgressionSettingsFlags flags;
-        
-        if (settings->get("show-best-run").unwrap().asBool().unwrap()) {
-            flags |= ProgressionSettingsFlags::ShowBestRun;
-        }
-
-        if (settings->get("show-attempts-for-progress").unwrap().asBool().unwrap()) {
-            flags |= ProgressionSettingsFlags::ShowAttempts;
-        }
-
-        if (settings->get("show-pass-amount").unwrap().asBool().unwrap()) {
-            flags |= ProgressionSettingsFlags::ShowPassAmount;
-        }
-
-        return flags;
-    }
+private:
+    SettingsUtils() {};
 };
 
-DEFINE_FULL_BITMASK(SettingsUtils::ProgressionSettingsFlags);
+ENUM_BITWISE_OPERATORS(SettingsUtils::ProgressionSettingsFlags);
+
+inline SettingsUtils::ProgressionSettingsFlags SettingsUtils::getProgressionSettings()
+{
+    ProgressionSettingsFlags flags = ProgressionSettingsFlags::None;
+
+    //TODO: TEMPORARY DECISION, implement settings manager instead of this dogshit please<3 ! uwu_-
+    if (Mod::get()->getSettingValue<bool>("show-best-run")) {
+        flags |= ProgressionSettingsFlags::ShowBestRun;
+    }
+
+    if (Mod::get()->getSettingValue<bool>("show-attempts-for-progress")) {
+        flags |= ProgressionSettingsFlags::ShowAttempts;
+    }
+
+    if (Mod::get()->getSettingValue<bool>("show-pass-amount")) {
+        flags |= ProgressionSettingsFlags::ShowPassAmount;
+    }
+
+    if (Mod::get()->getSettingValue<bool>("enable-auto-checker")) {
+        flags |= ProgressionSettingsFlags::EnableAutoChecker;
+    }
+
+    return flags;
+}
 
 #endif // SETTINGS_UTIL_HPP

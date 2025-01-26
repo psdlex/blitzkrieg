@@ -15,11 +15,11 @@ protected:
     CCMenu* m_rootMenu;
 
 private:
-    bool init(const matjson::Value* settings, float width);
+    bool init(float width);
     std::vector<std::pair<std::string, float>> createVector(PSFlags flags);
 
 public:
-    static ProgressDescriptorNode* create(const matjson::Value* settings, float width);
+    static ProgressDescriptorNode* create(float width);
 };
 
 #endif // PROGRESS_DESCRIPTOR_NODE_HPP

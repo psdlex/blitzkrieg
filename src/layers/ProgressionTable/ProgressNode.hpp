@@ -11,7 +11,6 @@ class ProgressNode : public CCNode
 {
 protected:
     // data
-    matjson::Value* m_settings;
     ProgressInfo* m_progressInfo;
 
     // menus
@@ -25,10 +24,10 @@ protected:
     CCMenuItemToggler* m_isChecked;
 
 protected:
-    bool init(ProgressInfo* progressInfo, matjson::Value* settings, float width);
+    bool init(ProgressInfo* progressInfo, float width);
 
 public:
-    static ProgressNode* create(ProgressInfo* progressInfo, matjson::Value* settings, float width);
+    static ProgressNode* create(ProgressInfo* progressInfo, float width);
 };
 
 #endif // PROGRESS_NODE_HPP

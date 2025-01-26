@@ -3,25 +3,31 @@
 #define PATH_UTIL_HPP
 
 #include <Geode/Geode.hpp>
-#include "../abstraction/SingletonBase.hpp"
 
 using namespace geode::prelude;
 
-class PathUtil : public SingletonBase<PathUtil>
+class PathUtil
 {
-	friend class SingletonBase<PathUtil>;
+	static std::filesystem::path levelsFolder;
 
 public:
-	std::filesystem::path* getLevelsFolder() { return &levelsFolder; }
-
-private:
-	std::filesystem::path levelsFolder;
-
-private:
-	PathUtil()
+	static Result<> init() 
 	{
-		levelsFolder = Mod::get()->getSaveDir() / "levels";
-	}
+		try {
+			levelsFolder = Mod::get()->getSaveDir() / "levels";
+		} catch (auto& ex) {
+			return Err("Something went wrong while obtaining save dir");
+		}
+
+		return Ok();
+	} 
+
+	static std::filesystem::path* getLevelsFolder() { return &levelsFolder; }
+
+private:
+	PathUtil() {}
 };
+
+inline std::filesystem::path PathUtil::levelsFolder;
 
 #endif // PATH_UTIL_HPP

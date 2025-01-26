@@ -12,7 +12,6 @@ class StageNode : public CCNode
 {
 protected:
     // data
-    matjson::Value* m_settings;
     ProgressionStage* m_progressionStage;
 
     float m_menuWidth;
@@ -31,7 +30,7 @@ protected:
     std::vector<ProgressNode*> m_progressNodes;
 
 protected:
-    bool init(ProgressionStage* stage, matjson::Value* settings, float width);
+    bool init(ProgressionStage* stage, float width);
 
     void setupMenus();
     void setupBasics(float width);
@@ -41,7 +40,7 @@ protected:
     void onStageCheck(CCObject* sender);    
 
 public:
-    static StageNode* create(ProgressionStage* stage, matjson::Value* settings, float width);
+    static StageNode* create(ProgressionStage* stage, float width);
 };
 
 #endif // PROGRESSION_STAGE_NODE_HPP
