@@ -3,7 +3,6 @@
 bool BKPlayLayer::init(GJGameLevel* level, bool useReplay, bool dontCreateObjects)
 {
     auto settings = Mod::get()->getSavedSettingsData();
-    log::info("{}", settings.get("show-best-run").unwrap().asBool().unwrap());
 
     auto cached = LevelProgressionManager::get()->getCachedProgression(level);
     if (cached.isOk()) {

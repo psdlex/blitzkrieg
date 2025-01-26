@@ -4,8 +4,8 @@
 
 struct ProgressBestRun
 {
-    uint32_t m_fromPercent;
-    uint32_t m_toPercent;
+    uint32_t m_fromPercent = 0;
+    uint32_t m_toPercent = 0;
 };
 
 #endif // PROGRESS_BEST_RUN_HPP

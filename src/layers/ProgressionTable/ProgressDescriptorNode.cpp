@@ -12,18 +12,21 @@ bool ProgressDescriptorNode::init(float width)
 
     // root menu
     m_rootMenu = CCMenu::create();
+    m_rootMenu->setID("progress-descriptor-menu");
     m_rootMenu->ignoreAnchorPointForPosition(false);
     m_rootMenu->setContentSize(getContentSize() - CCSize({ 10, 0 }));
     m_rootMenu->setAnchorPoint({ 0.5, 0.5 });
     m_rootMenu->setLayout(RowLayout::create()
                            ->setAxisAlignment(AxisAlignment::Between)
                            ->setAutoScale(false)
+                           ->setAutoGrowAxis(std::nullopt)
                            ->setAxisReverse(false));
 
     this->addChildAtPosition(m_rootMenu, Anchor::Center);
 
     // background
     auto background = CCLayerColor::create(PROGRESS_DESCRIPTOR_COLOR_CCC4);
+    background->setID("progress-descriptor-bg");
     background->ignoreAnchorPointForPosition(false);
     background->setAnchorPoint({ 0.5, 0.5 });
     background->setContentSize(getContentSize());
@@ -32,11 +35,13 @@ bool ProgressDescriptorNode::init(float width)
 
     // descriptors (name/scale)
     auto descriptors = createVector(SettingsUtils::getProgressionSettings());
-
+    _descriptorsPositionsX = std::vector<float>();
+    
     for (auto& descriptor : descriptors)
     {
         auto text = CCLabelBMFont::create(descriptor.first.c_str(), BIGFONT);
         text->ignoreAnchorPointForPosition(false);
+        text->setID("progress-descriptor-item");
         text->setAlignment(CCTextAlignment::kCCTextAlignmentCenter);
         text->setAnchorPoint({ 0.5, 0.5 });
         text->setScale(descriptor.second);
@@ -45,6 +50,10 @@ bool ProgressDescriptorNode::init(float width)
     }
 
     m_rootMenu->updateLayout();
+
+    for (auto& child : CCArrayExt<cocos2d::CCNode*>(m_rootMenu->getChildren())) {
+        _descriptorsPositionsX.push_back(child->getPositionX());
+    }
 
     return true;
 }

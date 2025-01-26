@@ -13,6 +13,7 @@ class ProgressDescriptorNode : public CCNode
 {
 protected:
     CCMenu* m_rootMenu;
+    std::vector<float> _descriptorsPositionsX;
 
 private:
     bool init(float width);
@@ -20,6 +21,8 @@ private:
 
 public:
     static ProgressDescriptorNode* create(float width);
+
+    std::vector<float>* getDescriptorsPositions() { return &_descriptorsPositionsX; }
 };
 
 #endif // PROGRESS_DESCRIPTOR_NODE_HPP

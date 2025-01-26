@@ -27,7 +27,6 @@ public:
         return oss.str();
     }
 
-
 private:
     StringUtil() {};
 };

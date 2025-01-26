@@ -110,7 +110,7 @@ void StageNode::setupProgresses()
 
     for (auto& progress : m_progressionStage->m_progresses)
     {
-        auto progressNode = ProgressNode::create(&progress, m_menuWidth);
+        auto progressNode = ProgressNode::create(&progress, m_menuWidth, progressDescriptor->getDescriptorsPositions());
         m_progressInfosMenu->addChild(progressNode);
         m_progressNodes.push_back(progressNode);
     }

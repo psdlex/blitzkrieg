@@ -38,8 +38,8 @@ struct matjson::Serialize<ProgressInfo>
 	static Result<ProgressInfo> fromJson(const matjson::Value& value)
 	{
 		ProgressInfo info;
-		GEODE_UNWRAP_INTO(info.m_fromPercent, value["fromPercent"].as<double>());
-		GEODE_UNWRAP_INTO(info.m_toPercent, value["toPercent"].as<double>());
+		GEODE_UNWRAP_INTO(info.m_fromPercent, value["fromPercent"].as<uint32_t>());
+		GEODE_UNWRAP_INTO(info.m_toPercent, value["toPercent"].as<uint32_t>());
 		GEODE_UNWRAP_INTO(info.m_passAmount, value["passAmount"].as<uint32_t>());
 		GEODE_UNWRAP_INTO(info.m_attemptsToPass, value["attemptsToPass"].as<uint32_t>());
 		GEODE_UNWRAP_INTO(info.m_bestRun, value["bestRun"].as<ProgressBestRun>());

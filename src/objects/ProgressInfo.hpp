@@ -5,12 +5,11 @@
 #include "../objects/ProgressBestRun.hpp"
 
 struct ProgressInfo {
-    double m_fromPercent;
-    double m_toPercent;
-
-    uint32_t m_passAmount;
-    uint32_t m_attemptsToPass;
-    ProgressBestRun m_bestRun;
+    uint32_t m_fromPercent;
+    uint32_t m_toPercent;
+    uint32_t m_passAmount = 0;
+    uint32_t m_attemptsToPass = 0;
+    ProgressBestRun m_bestRun = {};
 };
 
 #endif // PROGRESSION_INFO_HPP

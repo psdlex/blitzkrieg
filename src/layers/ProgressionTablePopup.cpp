@@ -297,6 +297,5 @@ ProgressionTablePopup* ProgressionTablePopup::create(LevelProgression* progressi
 void ProgressionTablePopup::onClose(CCObject* x)
 {
     m_scrollLayerPositionY = m_stagesScrollLayer->m_contentLayer->getPositionY();
-    log::info("{}", m_scrollLayerPositionY);
     Popup::onClose(x);
 }
