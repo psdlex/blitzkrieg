@@ -1,12 +1,14 @@
 #include <cvolton.level-id-api/include/EditorIDs.hpp>
 #include "LevelProgressionManager.hpp"
-#include "../utils/PathUtil.hpp"
+#include "PathManager.hpp"
+
+using namespace managers;
 
 Result<> LevelProgressionManager::init()
 {
-    auto levelFolder = PathUtil::getLevelsFolder();
-    auto created = file::createDirectory(*levelFolder);
-    return created;
+    auto levelsFolder = PathManager::get()->getLevelsFolder();
+    auto created = file::createDirectory(*levelsFolder);
+    return !created.isOk() ? Err("LevelProgressionManager: failed to create a folder") : created;
 }
 
 Result<LevelProgression*> LevelProgressionManager::getCachedProgression(GJGameLevel* const level)
@@ -23,7 +25,7 @@ Result<LevelProgression*> LevelProgressionManager::getCachedProgression(GJGameLe
         return Ok(&m_cachedLevelProgressions[levelKey]);
     }
 
-    return Err("Object not found");
+    return Err("Progression cache not found");
 }
 
 Result<LevelProgression*> LevelProgressionManager::getProgression(GJGameLevel* const level)
@@ -35,11 +37,16 @@ Result<LevelProgression*> LevelProgressionManager::getProgression(GJGameLevel* c
     }
 
     auto levelKey = levelKeyResult.unwrap();
-    auto fullPath = *PathUtil::getLevelsFolder() / (levelKey + ".json");
+    auto fullPath = getLevelPath(level, &levelKey);
+
+    if (!std::filesystem::exists(fullPath)) {
+        return Err("Progression for this level doesnt exist");
+    }
+
     auto levelProgression = file::readFromJson<LevelProgression>(fullPath);
 
     if (!levelProgression.isOk()) {
-        return Err("Couldnt read from json.");
+        return Err("Couldn't read level progression from json");
     }
 
     m_cachedLevelProgressions[levelKey] = levelProgression.unwrap();
@@ -56,24 +63,52 @@ Result<LevelProgression*> LevelProgressionManager::createEmptyProgression(GJGame
     }
 
     auto levelKey = levelKeyResult.unwrap();
-    bool result = setProgression(level, &progression, &levelKey);
+    auto result = setProgression(level, &progression);
 
-    if (!result) {
-        return Err("Something went wrong");
+    if (!result.isOk()) {
+        return Err(result.unwrapErr());
     }
 
     m_cachedLevelProgressions[levelKey] = progression;
     return Ok(&m_cachedLevelProgressions[levelKey]);
 }
 
-bool LevelProgressionManager::setProgression(const GJGameLevel* level, const LevelProgression* levelProgression, const gd::string* levelKey)
+Result<> LevelProgressionManager::setProgression(GJGameLevel* const level, const LevelProgression* const levelProgression)
 {
-    auto fullPath = *PathUtil::getLevelsFolder() / (*levelKey + ".json");
-    auto result = file::writeToJson(fullPath, *levelProgression);
+    auto levelKeyResult = getLevelKey(level);
+    if (!levelKeyResult.isOk()) {
+        return Err(levelKeyResult.unwrapErr());
+    }
 
-    return result.isOk();
+    auto levelKey = levelKeyResult.unwrap();
+    auto fullPath = getLevelPath(level, &levelKey);
+    auto result = file::writeToJson(fullPath, *levelProgression);
+    return !result.isOk() ? Err("Couldnt save level progress into json") : result; 
 }
 
+Result<> LevelProgressionManager::removeProgression(GJGameLevel* const level)
+{
+    auto levelKeyResult = getLevelKey(level);
+    if (!levelKeyResult.isOk()) {
+        return Err(levelKeyResult.unwrapErr());
+    }
+
+    auto levelKey = levelKeyResult.unwrap();
+    auto fullPath = getLevelPath(level, &levelKey);
+    auto result = std::filesystem::remove(fullPath);
+    
+    if (!result) {
+        return Err("Couldn't remove level progression file");
+    }
+
+    m_cachedLevelProgressions.erase(levelKey);
+    return Ok();
+}
+
+std::filesystem::path LevelProgressionManager::getLevelPath(GJGameLevel* const level, const gd::string* levelKey)
+{
+    return *PathManager::get()->getLevelsFolder() / (*levelKey + ".json");
+}
 
 // copy-pasted from: https://github.com/eloh-mrow/death-tracker
 Result<std::string> LevelProgressionManager::getLevelKey(GJGameLevel* const level) {

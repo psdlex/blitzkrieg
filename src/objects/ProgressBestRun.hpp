@@ -6,6 +6,11 @@ struct ProgressBestRun
 {
     uint32_t m_fromPercent = 0;
     uint32_t m_toPercent = 0;
+
+    void reset()
+    {
+        m_fromPercent = m_toPercent = 0;
+    }
 };
 
 #endif // PROGRESS_BEST_RUN_HPP

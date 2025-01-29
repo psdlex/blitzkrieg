@@ -17,12 +17,18 @@ bool StageNode::init(ProgressionStage* stage, float width)
     setupMenus();
     setupStage();
     setupProgresses();
+
+    setActive(stage->m_isActive);
+    setPassed(stage->m_isPassed, false, false);
+    setEnabled(stage->m_isAvailable);
+
+    registerCheckable(m_passToggler);
     return true;
 }
 
 void StageNode::setupBasics(float width)
 {
-    // data (size() + 1 for progress descriptor (progress, atts, pass amount, etc...))
+    // data (stage menu) + (size() + 1 for progress descriptor (progress, atts, pass amount, etc...))
     m_menuHeight = ((m_progressionStage->m_progresses.size() + 1) * (PROGRESS_HEIGHT + PROGRESS_MARGIN) - PROGRESS_MARGIN) + (STAGE_MENU_HEIGHT + STAGE_MENU_MARGIN) + (ROOT_MENU_MARGIN * 2);
 
     // content size
@@ -58,9 +64,9 @@ void StageNode::setupMenus()
 
     // stage menu
     m_stageMenu = CCMenu::create();
-    m_stageMenu->setAnchorPoint({ 0, 1 });
+    m_stageMenu->setAnchorPoint({ 0.5, 1 });
     m_stageMenu->ignoreAnchorPointForPosition(false);
-    m_stageMenu->setContentSize({ m_menuWidth, STAGE_MENU_HEIGHT });
+    m_stageMenu->setContentSize({ m_menuWidth - 8, STAGE_MENU_HEIGHT });
     m_stageMenu->setID("stage-base-menu");
 
     m_rootMenu->addChild(m_stageMenu);
@@ -78,6 +84,24 @@ void StageNode::setupMenus()
 
     m_rootMenu->addChild(m_progressInfosMenu);
 
+    // blocking layer
+    m_blockingLayer = CCLayerColor::create(ccc4(0,0,0,90));
+    m_blockingLayer->ignoreAnchorPointForPosition(false);
+    m_blockingLayer->setVisible(false);
+    m_blockingLayer->setContentSize(getContentSize());
+    m_blockingLayer->setAnchorPoint({ 0.5, 0.5 });
+
+    this->addChildAtPosition(m_blockingLayer, Anchor::Center);
+
+    // passed layer
+    m_passedLayer = CCScale9Sprite::createWithSpriteFrameName("passed-outline.png"_spr);
+    m_passedLayer->ignoreAnchorPointForPosition(false);
+    m_passedLayer->setVisible(false);
+    m_passedLayer->setContentSize(getContentSize());
+    m_passedLayer->setAnchorPoint({ 0.5, 0.5 });
+
+    this->addChildAtPosition(m_passedLayer, Anchor::Center);
+
     // updating
     m_rootMenu->updateLayout();
 }
@@ -94,13 +118,14 @@ void StageNode::setupStage()
     m_stageMenu->addChildAtPosition(m_stageIndexLabel, Anchor::Left);
 
     // stage toggler
-    m_stageToggler = CCMenuItemToggler::createWithStandardSprites(this, menu_selector(StageNode::onStageCheck), 1.f);
-    m_stageToggler->setScale(0.5);
-    m_stageToggler->setAnchorPoint({ 1, 0.5 });
-    m_stageToggler->ignoreAnchorPointForPosition(false);
-    m_stageToggler->setID("stage-toggler");
+    m_passToggler = CCMenuItemToggler::createWithStandardSprites(this, nullptr, 1.f);
+    m_passToggler->setScale(0.5);
+    m_passToggler->setAnchorPoint({ 1, 0.5 });
+    m_passToggler->ignoreAnchorPointForPosition(false);
+    m_passToggler->setID("stage-toggler");
+    m_passToggler->toggle(m_progressionStage->m_isPassed);
 
-    m_stageMenu->addChildAtPosition(m_stageToggler, Anchor::Right);
+    m_stageMenu->addChildAtPosition(m_passToggler, Anchor::Right);
 }
 
 void StageNode::setupProgresses()
@@ -111,6 +136,7 @@ void StageNode::setupProgresses()
     for (auto& progress : m_progressionStage->m_progresses)
     {
         auto progressNode = ProgressNode::create(&progress, m_menuWidth, progressDescriptor->getDescriptorsPositions());
+        progressNode->onCheck([&](ProgressNode* node, bool checked) { onProgressCheck(node, checked); });
         m_progressInfosMenu->addChild(progressNode);
         m_progressNodes.push_back(progressNode);
     }
@@ -119,14 +145,29 @@ void StageNode::setupProgresses()
 }
 
 
-void StageNode::onStageCheck(CCObject* sender)
+void StageNode::onCheckImpl(CCObject* sender)
 {
     auto toggler = static_cast<CCMenuItemToggler*>(sender);
     if (!toggler) {
         return;
     }
 
-    m_progressionStage->m_checked = !toggler->m_toggled; // reversing cuz yeah, it takes the value before changing it
+    bool toggled = !toggler->m_toggled;
+    if (toggled == true && !allNodesChecked()) {
+        toggler->m_toggled = !(false); // reverse again
+        return;
+    }
+
+    m_checkFunc(this, toggled);
+}
+
+void StageNode::onProgressCheck(ProgressNode* node, bool checked)
+{
+    // cant uncheck progress while stage is checked
+    if (checked == false && m_progressionStage->m_isPassed)
+    {
+        node->setPassed(!(true)); // reverse
+    }
 }
 
 
@@ -140,4 +181,46 @@ StageNode* StageNode::create(ProgressionStage* stage, float width)
 
     delete ret;
     return nullptr;
+}
+
+
+void StageNode::setEnabled(bool isTrue)
+{
+    m_progressionStage->m_isAvailable = isTrue;
+    m_blockingLayer->setVisible(!isTrue);
+    m_stageMenu->setEnabled(isTrue);
+
+    for (auto& node : m_progressNodes) {
+        node->setEnabled(isTrue);
+    }
+}
+
+void StageNode::setPassed(bool isTrue, bool setToChildren, bool reverse)
+{
+    m_progressionStage->m_isPassed = isTrue;
+    m_passToggler->toggle(reverse ? !isTrue : isTrue);
+    m_passedLayer->setVisible(isTrue);
+    
+    if (setToChildren == false) {
+        return;
+    }
+    
+    for (auto& node : m_progressNodes) {
+        node->setPassed(reverse ? !isTrue : isTrue);
+    }
+}
+
+void StageNode::setActive(bool isTrue)
+{
+    m_progressionStage->m_isActive = isTrue;
+}
+
+bool StageNode::allNodesChecked()
+{
+    bool result = true;
+    for (auto& node : m_progressNodes) {
+        result = result && node->isChecked();
+    }
+
+    return result;
 }

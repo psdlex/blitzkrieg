@@ -1,15 +1,17 @@
 #include <regex>
+#include "../layers/ProgressionTablePopup.hpp"
+#include "../hooks/BKPlayLayer.hpp"
 #include "../utils/ProgressionStageUtil.hpp"
 #include "../utils/StringUtil.hpp"
 #include "../utils/ScrollUtil.hpp"
-#include "../layers/ProgressionTablePopup.hpp"
 #include "../defines/ProgressionTable.hpp"
 #include "../defines/Fonts.hpp"
 #include "../defines/SquareSprites.hpp"
 #include "../defines/IconSprites.hpp"
 #include "../ui/EditorButtonWithSprite.hpp"
-#include "ProgressionTable/StageNode.hpp"
-#include "../hooks/BKPlayLayer.hpp"
+#include "../managers/LogManager.hpp"
+
+using namespace managers;
 
 bool ProgressionTablePopup::setup(LevelProgression* value)
 {
@@ -198,10 +200,32 @@ void ProgressionTablePopup::onFindStartPoses(CCObject*)
 
 void ProgressionTablePopup::onResetProgress(CCObject*)
 {
+    createQuickPopup("Progress Reset", "Are you sure you want to reset your entire progress?", "No", "Yes", [this](auto, bool isYes){
+        if (!isYes) {
+            return;
+        }
+
+        m_progression->reset();
+        loadProgression();
+    });
 }
 
 void ProgressionTablePopup::onDeleteProgress(CCObject*)
 {
+    createQuickPopup("Table Deconstruction", "Are you sure you want to remove progression table for this level?", "No", "Yes", [this](auto, bool isYes){
+        if (!isYes) {
+            return;
+        }
+
+        auto removeResult = LevelProgressionManager::get()->removeProgression(PlayLayer::get()->m_level); // idk how else to obtain it
+
+        if (removeResult.isOk()) {
+            onClose(this);
+        } else {
+            LogManager::get()->error("couldnt remove table: {}", removeResult.unwrapErr());
+            FLAlertLayer::create("Remove Failed", "Something went wrong.. Try again", "Ok");
+        }
+    });
 }
 
 void ProgressionTablePopup::onApplySearch(CCObject*)
@@ -230,6 +254,63 @@ void ProgressionTablePopup::onApplySearch(CCObject*)
     }
 }
 
+void ProgressionTablePopup::onClose(CCObject* x)
+{
+    m_scrollLayerPositionY = m_stagesScrollLayer->m_contentLayer->getPositionY();
+    Popup::onClose(x);
+}
+
+void ProgressionTablePopup::onStageCheck(StageNode* node, bool checked)
+{
+    if (checked) {
+        handleChecked(node);
+    } else {
+        handleUnchecked(node);
+    }
+}
+
+void ProgressionTablePopup::handleChecked(StageNode* node)
+{
+    uint32_t index = node->getStageIndex();
+    bool lastStage = (index + 1) == m_stageNodes.size();
+
+    // current stage
+    node->setPassed(true, false);
+    node->setActive(false);
+
+    // next stage
+    if (!lastStage) {
+        auto nextStage = m_stageNodes.at(index + 1);
+        nextStage->setActive(true);
+        nextStage->setEnabled(true);
+    }
+}
+
+void ProgressionTablePopup::handleUnchecked(StageNode* node)
+{
+    uint32_t index = node->getStageIndex();
+    bool lastStage = (index + 1) == m_stageNodes.size();
+
+    // current stage
+    node->setPassed(false, false);
+    node->setActive(true);
+
+    if (lastStage) {
+        return;
+    }
+
+    // all next stages
+    for (uint32_t i = 0; i < m_stageNodes.size(); i++) {
+        if (i <= index) {
+            continue;
+        }
+
+        auto nextStage = m_stageNodes.at(i);
+        nextStage->setActive(false);
+        nextStage->setPassed(false, true, false);
+        nextStage->setEnabled(false);
+    }
+}
 
 void ProgressionTablePopup::parseProgression(const std::string text)
 {
@@ -262,10 +343,15 @@ void ProgressionTablePopup::loadProgression()
 {    
     m_noProgressLabel->setVisible(m_progression->m_stages.size() < 1);
     m_stagesScrollLayer->m_contentLayer->removeAllChildren();
+    m_stageNodes = {};
+
     for (auto& stage : m_progression->m_stages)
     {
-        auto item = StageNode::create(&stage, m_stagesScrollLayer->m_contentLayer->getContentWidth());
-        m_stagesScrollLayer->m_contentLayer->addChild(item);
+        auto node = StageNode::create(&stage, m_stagesScrollLayer->m_contentLayer->getContentWidth());
+        node->onCheck([&](StageNode* node, bool checked) { ProgressionTablePopup::onStageCheck(node, checked); });
+        
+        m_stagesScrollLayer->m_contentLayer->addChild(node);
+        m_stageNodes.push_back(node);
     }
     
     m_stagesScrollLayer->m_contentLayer->updateLayout();
@@ -292,10 +378,4 @@ ProgressionTablePopup* ProgressionTablePopup::create(LevelProgression* progressi
     
     delete popup;
     return nullptr;
-}
-
-void ProgressionTablePopup::onClose(CCObject* x)
-{
-    m_scrollLayerPositionY = m_stagesScrollLayer->m_contentLayer->getPositionY();
-    Popup::onClose(x);
 }

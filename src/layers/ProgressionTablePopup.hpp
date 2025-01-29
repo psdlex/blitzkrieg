@@ -4,12 +4,14 @@
 
 #include <Geode/Geode.hpp>
 #include "../objects/LevelProgression.hpp"
+#include "ProgressionTable/StageNode.hpp"
 
 using namespace geode::prelude;
 
 class ProgressionTablePopup : public geode::Popup<LevelProgression*> {
     // data
     LevelProgression* m_progression;
+    std::vector<StageNode*> m_stageNodes;
     
     // menus
     CCMenu* m_rootMenu;
@@ -42,9 +44,13 @@ protected:
     void setupSearchControls();
     void setupProgressList();
 
+    void handleChecked(StageNode* node);
+    void handleUnchecked(StageNode* node);
+
     void onFindStartPoses(CCObject*);
     void onResetProgress(CCObject*);
     void onDeleteProgress(CCObject*);
+    void onStageCheck(StageNode* node, bool checked);
 
     void onApplySearch(CCObject*);
 public:

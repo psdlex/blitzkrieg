@@ -3,11 +3,9 @@
 #define PROGRESS_DESCRIPTOR_NODE_HPP
 
 #include <Geode/Geode.hpp>
-#include "../../utils/SettingsUtil.hpp"
+#include "../../managers/SettingsManager.hpp"
 
 using namespace geode::prelude;
-
-typedef SettingsUtils::ProgressionSettingsFlags PSFlags;
 
 class ProgressDescriptorNode : public CCNode
 {

@@ -1,35 +1,25 @@
-// #define ╔
-// #define ║
-// #define ═
-// #define ╚
-// #define ╗ {
-// #define ╝ }
-// #define LOAAAADDEEEEDDDD $on_mod(LOADED)
-
-// ╔══════════════ LOAAAADDEEEEDDDD ══════════════╗
-// ║ ╔══════════════════════════════════════════╗ ║
-// ║ ║    ╔══════════ if (true) ═══════════╗    ║ ║
-// ║ ║    ║ log::info("BLITZKRIEG LOADED") ║    ║ ║
-// ║ ║    ╚════════════════════════════════╝    ║ ║
-// ║ ╚══════════════════════════════════════════╝ ║
-// ╚══════════════════════════════════════════════╝
-
 #include <Geode/Geode.hpp>
 #include "managers/LevelProgressionManager.hpp"
+#include "managers/LogManager.hpp"
+#include "managers/PathManager.hpp"
+#include "managers/abstraction/Initializable.hpp"
 
 using namespace geode::prelude;
 
-$on_mod(Loaded)
-{
-    auto lpmInit = LevelProgressionManager::init();
-    auto puInit = PathUtil::init();
-    if (!lpmInit.isOk()) {
-        log::error("ERROR WHILE INITIALIZING: {0}", lpmInit.unwrapErr());
+$on_mod(Loaded) {
+    std::array<Initializable*, 3> initializables = {
+        managers::PathManager::get(),
+        managers::LogManager::get(),
+        managers::LevelProgressionManager::get()
+    };
+
+    for (auto& initializable : initializables) {
+        auto result = initializable->init();
+
+        if (!result.isOk()) {
+            log::error("Error while initializing: {}", result.unwrapErr());
+        }
     }
-    else if (!puInit.isOk()) {
-        log::error("ERROR WHILE INITIALIZING: {0}", puInit.unwrapErr());
-    }
-    else {
-        log::info("BLITZKRIEG FULLY LOADED");
-    }
+
+    log::info("Blitzkrieg initialized");
 }

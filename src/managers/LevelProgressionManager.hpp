@@ -4,28 +4,35 @@
 
 #include <Geode/Geode.hpp>
 #include "../serializers/GenericSerializers.hpp"
-#include "../utils/PathUtil.hpp"
 #include "../abstraction/SingletonBase.hpp"
+#include "abstraction/Initializable.hpp"
 
 using namespace geode::prelude;
 
-class LevelProgressionManager : public SingletonBase<LevelProgressionManager>
+namespace managers
 {
-private:
-	friend class SingletonBase<LevelProgressionManager>;
-	std::map<std::string, LevelProgression> m_cachedLevelProgressions;
+	class LevelProgressionManager : public SingletonBase<LevelProgressionManager>, public Initializable
+	{
+		friend class SingletonBase<LevelProgressionManager>;
 
-public:
-	static Result<> init();
+	private:
+		std::map<std::string, LevelProgression> m_cachedLevelProgressions;
 
-	Result<LevelProgression*> getCachedProgression(GJGameLevel* const level);
-	Result<LevelProgression*> getProgression(GJGameLevel* const level);
-	Result<LevelProgression*> createEmptyProgression(GJGameLevel* const level);
-	bool setProgression(const GJGameLevel* level, const LevelProgression* levelProgression, const gd::string* levelKey);
+	public:
+		Result<> LevelProgressionManager::init() override;
 
-private:
-	LevelProgressionManager() {};
-	geode::Result<std::string> getLevelKey(GJGameLevel* const level);
+		Result<LevelProgression*> getCachedProgression(GJGameLevel* const level);
+		Result<LevelProgression*> getProgression(GJGameLevel* const level);
+		Result<LevelProgression*> createEmptyProgression(GJGameLevel* const level);
+
+		Result<> setProgression(GJGameLevel* const level, const LevelProgression* const levelProgression);
+		Result<> removeProgression(GJGameLevel* const level);
+
+	private:
+		LevelProgressionManager() {};
+		Result<std::string> getLevelKey(GJGameLevel* const level);
+		std::filesystem::path getLevelPath(GJGameLevel* const level, const gd::string* levelKey);
+	};
 };
 
 #endif // LEVEL_PROGRESSION_MANAGER_HPP

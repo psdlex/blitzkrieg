@@ -7,6 +7,9 @@
 #include "../objects/LevelProgression.hpp"
 #include "../managers/LevelProgressionManager.hpp"
 
+using namespace geode::prelude;
+using namespace managers;
+
 class $modify(BKPlayLayer, PlayLayer)
 {
     struct Fields

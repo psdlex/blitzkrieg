@@ -2,9 +2,7 @@
 #include "../../defines/ProgressNode.hpp"
 #include "../../defines/Fonts.hpp"
 #include "../../utils/TypeConversionUtil.hpp"
-#include "../../utils/SettingsUtil.hpp"
-
-typedef SettingsUtils::ProgressionSettingsFlags PSFlags;
+#include "../../managers/SettingsManager.hpp"
 
 bool ProgressNode::init(ProgressInfo* progressInfo, float width, const std::vector<float>* descriptorsPoses)
 {
@@ -15,7 +13,7 @@ bool ProgressNode::init(ProgressInfo* progressInfo, float width, const std::vect
     setContentSize({ width, PROGRESS_HEIGHT });
 
     // flags
-    auto flags = SettingsUtils::getProgressionSettings();
+    auto flags = managers::SettingsManager::get()->getProgressionSettings();
     uint32_t currentPos = 0;
 
     // menu
@@ -46,8 +44,9 @@ bool ProgressNode::init(ProgressInfo* progressInfo, float width, const std::vect
     }
 
     // toggler
-    m_menu->addChildAtPosition(createPassToggler(), Anchor::Left, { descriptorsPoses->at(currentPos++), 0 });
+    m_menu->addChildAtPosition(createPassToggler(), Anchor::Left, { descriptorsPoses->at(currentPos), 0 });
 
+    registerCheckable(m_passToggler);
     return true;
 }
 
@@ -68,8 +67,8 @@ CCLabelBMFont* ProgressNode::createProgressLabel()
 CCLabelBMFont* ProgressNode::createBestRunLabel()
 {
     auto bestRunString = std::format("{0}% - {1}%",
-                TypeConversionUtil::doubleToString(m_progressInfo->m_bestRun.m_fromPercent, 2),
-                TypeConversionUtil::doubleToString(m_progressInfo->m_bestRun.m_toPercent, 2));
+                TypeConversionUtil::doubleToString(m_progressInfo->m_bestRun.m_fromPercent, 1),
+                TypeConversionUtil::doubleToString(m_progressInfo->m_bestRun.m_toPercent, 1));
     
     auto bestRunLabel = CCLabelBMFont::create(bestRunString.c_str(), BIGFONT);
     bestRunLabel->setAnchorPoint({ 0.5, 0.5 });
@@ -103,17 +102,25 @@ CCLabelBMFont* ProgressNode::createAttemptsLabel()
 
 CCMenuItemToggler* ProgressNode::createPassToggler()
 {
-    auto toggler = CCMenuItemToggler::createWithStandardSprites(this, menu_selector(ProgressNode::onProgressCheck), 1.f);
-    toggler->setScale(0.4);
-    toggler->setAnchorPoint({ 0.5, 0.5 });
-    toggler->ignoreAnchorPointForPosition(false);
-    toggler->setID("progress-pass-toggler");
-    return toggler;
+    m_passToggler = CCMenuItemToggler::createWithStandardSprites(this, nullptr, 1.f);
+    m_passToggler->setScale(0.4);
+    m_passToggler->setAnchorPoint({ 0.5, 0.5 });
+    m_passToggler->ignoreAnchorPointForPosition(false);
+    m_passToggler->setID("progress-pass-toggler");
+    m_passToggler->toggle(m_progressInfo->m_isPassed);
+
+    return m_passToggler;
 }
 
-void ProgressNode::onProgressCheck(CCObject* object)
+void ProgressNode::onCheckImpl(CCObject* sender)
 {
+    auto toggler = static_cast<CCMenuItemToggler*>(sender);
+    if (!toggler) {
+        return;
+    }
 
+    m_progressInfo->m_isPassed = !toggler->m_toggled; // reversing intentionally
+    m_checkFunc(this, !toggler->m_toggled);
 }
 
 ProgressNode* ProgressNode::create(ProgressInfo* progressInfo, float width, const std::vector<float>* descriptorsPoses)
@@ -126,4 +133,20 @@ ProgressNode* ProgressNode::create(ProgressInfo* progressInfo, float width, cons
 
     delete ret;
     return nullptr;
+}
+
+void ProgressNode::setEnabled(bool isTrue)
+{
+    m_menu->setEnabled(isTrue);
+}
+
+void ProgressNode::setPassed(bool isTrue)
+{
+    m_progressInfo->m_isPassed = isTrue;
+    m_passToggler->toggle(isTrue);
+}
+
+bool ProgressNode::isChecked()
+{
+    return m_passToggler->m_toggled;
 }

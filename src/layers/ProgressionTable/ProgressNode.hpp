@@ -4,10 +4,11 @@
 
 #include "Geode/Geode.hpp"
 #include "../../objects/ProgressInfo.hpp"
+#include "../../ui/CheckableNode.hpp"
 
 using namespace geode::prelude;
 
-class ProgressNode : public CCNode
+class ProgressNode : public CheckableNode<ProgressNode*, bool>
 {
 protected:
     // data
@@ -18,7 +19,7 @@ protected:
     CCMenu* m_menu;
 
     // other
-    CCMenuItemToggler* m_isChecked;
+    CCMenuItemToggler* m_passToggler;
 
 protected:
     bool init(ProgressInfo* progressInfo, float width, const std::vector<float>* descriptorsPoses);
@@ -28,11 +29,14 @@ protected:
     CCLabelBMFont* createPassAmountLabel();
     CCLabelBMFont* createAttemptsLabel();
     CCMenuItemToggler* createPassToggler();
-
-    void onProgressCheck(CCObject* object);
+    
+    void onCheckImpl(CCObject* sender) override;
 
 public:
     static ProgressNode* create(ProgressInfo* progressInfo, float width, const std::vector<float>* descriptorsPoses);
+    void setEnabled(bool isTrue);
+    void setPassed(bool isTrue);
+    bool isChecked();
 };
 
 #endif // PROGRESS_NODE_HPP

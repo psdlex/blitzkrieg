@@ -34,7 +34,7 @@ bool ProgressDescriptorNode::init(float width)
     this->addChildAtPosition(background, Anchor::Center);
 
     // descriptors (name/scale)
-    auto descriptors = createVector(SettingsUtils::getProgressionSettings());
+    auto descriptors = createVector(managers::SettingsManager::get()->getProgressionSettings());
     _descriptorsPositionsX = std::vector<float>();
     
     for (auto& descriptor : descriptors)

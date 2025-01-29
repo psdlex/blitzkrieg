@@ -38,6 +38,7 @@ struct matjson::Serialize<ProgressInfo>
 	static Result<ProgressInfo> fromJson(const matjson::Value& value)
 	{
 		ProgressInfo info;
+		GEODE_UNWRAP_INTO(info.m_isPassed, value["passed"].as<bool>());
 		GEODE_UNWRAP_INTO(info.m_fromPercent, value["fromPercent"].as<uint32_t>());
 		GEODE_UNWRAP_INTO(info.m_toPercent, value["toPercent"].as<uint32_t>());
 		GEODE_UNWRAP_INTO(info.m_passAmount, value["passAmount"].as<uint32_t>());
@@ -50,6 +51,7 @@ struct matjson::Serialize<ProgressInfo>
 	static matjson::Value toJson(const ProgressInfo& value)
 	{
 		auto obj = matjson::makeObject({
+			{ "passed", value.m_isPassed },
 			{ "fromPercent", value.m_fromPercent },
 			{ "toPercent", value.m_toPercent },
 			{ "attemptsToPass", value.m_attemptsToPass },
@@ -69,8 +71,9 @@ struct matjson::Serialize<ProgressionStage>
 	{
 		ProgressionStage stage;
 		GEODE_UNWRAP_INTO(stage.m_stage, value["stage"].as<uint32_t>());
-		GEODE_UNWRAP_INTO(stage.m_isActive, value["active"].as<uint32_t>());
-		GEODE_UNWRAP_INTO(stage.m_checked, value["checked"].as<uint32_t>());
+		GEODE_UNWRAP_INTO(stage.m_isActive, value["active"].as<bool>());
+		GEODE_UNWRAP_INTO(stage.m_isPassed, value["passed"].as<bool>());
+		GEODE_UNWRAP_INTO(stage.m_isAvailable, value["available"].as<bool>());
 		GEODE_UNWRAP_INTO(stage.m_progresses, value["progresses"].as<std::vector<ProgressInfo>>());
 
 		return Ok(stage);
@@ -80,7 +83,8 @@ struct matjson::Serialize<ProgressionStage>
 	{
 		auto obj = matjson::makeObject({
 			{ "stage", value.m_stage },
-			{ "checked", value.m_checked },
+			{ "passed", value.m_isPassed },
+			{ "available", value.m_isAvailable },
 			{ "active", value.m_isActive },
 			{ "progresses", value.m_progresses }
 		});
