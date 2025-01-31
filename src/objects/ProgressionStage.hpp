@@ -5,8 +5,7 @@
 #include "../objects/ProgressInfo.hpp"
 #include <vector>
 
-struct ProgressionStage
-{
+struct ProgressionStage {
     bool m_isActive = false;
     bool m_isPassed = false;
     bool m_isAvailable = false;
@@ -14,8 +13,7 @@ struct ProgressionStage
     uint32_t m_stage;
     std::vector<ProgressInfo> m_progresses;
 
-    void reset() 
-    {
+    void reset()  {
         m_isPassed = false;
         m_isActive = m_isAvailable = (m_stage == 1);
 

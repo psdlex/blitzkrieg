@@ -4,15 +4,13 @@
 
 using namespace managers;
 
-Result<> LevelProgressionManager::init()
-{
+Result<> LevelProgressionManager::init() {
     auto levelsFolder = PathManager::get()->getLevelsFolder();
     auto created = file::createDirectory(*levelsFolder);
     return !created.isOk() ? Err("LevelProgressionManager: failed to create a folder") : created;
 }
 
-Result<LevelProgression*> LevelProgressionManager::getCachedProgression(GJGameLevel* const level)
-{
+Result<LevelProgression*> LevelProgressionManager::getCachedProgression(GJGameLevel* const level) {
     auto levelKeyResult = getLevelKey(level);
 
     if (!levelKeyResult.isOk()) {
@@ -28,8 +26,7 @@ Result<LevelProgression*> LevelProgressionManager::getCachedProgression(GJGameLe
     return Err("Progression cache not found");
 }
 
-Result<LevelProgression*> LevelProgressionManager::getProgression(GJGameLevel* const level)
-{
+Result<LevelProgression*> LevelProgressionManager::getProgression(GJGameLevel* const level) {
     auto levelKeyResult = getLevelKey(level);
 
     if (!levelKeyResult.isOk()) {
@@ -53,8 +50,7 @@ Result<LevelProgression*> LevelProgressionManager::getProgression(GJGameLevel* c
     return Ok(&m_cachedLevelProgressions[levelKey]);
 }
 
-Result<LevelProgression*> LevelProgressionManager::createEmptyProgression(GJGameLevel* const level)
-{
+Result<LevelProgression*> LevelProgressionManager::createEmptyProgression(GJGameLevel* const level) {
     auto progression = LevelProgression();
     auto levelKeyResult = getLevelKey(level);
 
@@ -63,7 +59,7 @@ Result<LevelProgression*> LevelProgressionManager::createEmptyProgression(GJGame
     }
 
     auto levelKey = levelKeyResult.unwrap();
-    auto result = setProgression(level, &progression);
+    auto result = saveProgression(level, &progression);
 
     if (!result.isOk()) {
         return Err(result.unwrapErr());
@@ -73,8 +69,7 @@ Result<LevelProgression*> LevelProgressionManager::createEmptyProgression(GJGame
     return Ok(&m_cachedLevelProgressions[levelKey]);
 }
 
-Result<> LevelProgressionManager::setProgression(GJGameLevel* const level, const LevelProgression* const levelProgression)
-{
+Result<> LevelProgressionManager::saveProgression(GJGameLevel* const level, const LevelProgression* const levelProgression) {
     auto levelKeyResult = getLevelKey(level);
     if (!levelKeyResult.isOk()) {
         return Err(levelKeyResult.unwrapErr());
@@ -86,8 +81,7 @@ Result<> LevelProgressionManager::setProgression(GJGameLevel* const level, const
     return !result.isOk() ? Err("Couldnt save level progress into json") : result; 
 }
 
-Result<> LevelProgressionManager::removeProgression(GJGameLevel* const level)
-{
+Result<> LevelProgressionManager::removeProgression(GJGameLevel* const level) {
     auto levelKeyResult = getLevelKey(level);
     if (!levelKeyResult.isOk()) {
         return Err(levelKeyResult.unwrapErr());
@@ -105,8 +99,7 @@ Result<> LevelProgressionManager::removeProgression(GJGameLevel* const level)
     return Ok();
 }
 
-std::filesystem::path LevelProgressionManager::getLevelPath(GJGameLevel* const level, const gd::string* levelKey)
-{
+std::filesystem::path LevelProgressionManager::getLevelPath(GJGameLevel* const level, const gd::string* levelKey) {
     return *PathManager::get()->getLevelsFolder() / (*levelKey + ".json");
 }
 

@@ -9,10 +9,8 @@
 
 using namespace geode::prelude;
 
-namespace managers
-{
-	class LevelProgressionManager : public SingletonBase<LevelProgressionManager>, public Initializable
-	{
+namespace managers {
+	class LevelProgressionManager : public SingletonBase<LevelProgressionManager>, public Initializable {
 		friend class SingletonBase<LevelProgressionManager>;
 
 	private:
@@ -25,7 +23,7 @@ namespace managers
 		Result<LevelProgression*> getProgression(GJGameLevel* const level);
 		Result<LevelProgression*> createEmptyProgression(GJGameLevel* const level);
 
-		Result<> setProgression(GJGameLevel* const level, const LevelProgression* const levelProgression);
+		Result<> saveProgression(GJGameLevel* const level, const LevelProgression* const levelProgression);
 		Result<> removeProgression(GJGameLevel* const level);
 
 	private:

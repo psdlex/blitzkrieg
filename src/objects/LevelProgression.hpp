@@ -9,8 +9,7 @@ struct LevelProgression {
     std::vector<ProgressionStage> m_stages;
     std::vector<int> m_startPosPercents;
 
-    void reset()
-    {
+    void reset() {
         for (auto& stage : m_stages) {
             stage.reset();
         }

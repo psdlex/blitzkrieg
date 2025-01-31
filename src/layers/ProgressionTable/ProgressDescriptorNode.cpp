@@ -2,14 +2,36 @@
 #include "../../defines/ProgressNode.hpp"
 #include "../../defines/Fonts.hpp"
 
-bool ProgressDescriptorNode::init(float width)
-{
+bool ProgressDescriptorNode::init(float width) {
+    LMDEBUG("Initializing ProgressDescriptorNode");
+
     if (!CCNode::init()) {
+        LMERROR("Failed to initialize ProgressDescriptorNode (CCNode init failed)");
         return false;
     }
 
+    setupBasics(width);
+    setupMenu();
+    setupDescriptors();
+
+    return true;
+}
+
+void ProgressDescriptorNode::setupBasics(float width) {
+    // content size
     setContentSize({ width, PROGRESS_HEIGHT });
 
+    // background
+    auto background = CCLayerColor::create(PROGRESS_DESCRIPTOR_COLOR_CCC4);
+    background->setID("progress-descriptor-bg");
+    background->ignoreAnchorPointForPosition(false);
+    background->setAnchorPoint({ 0.5, 0.5 });
+    background->setContentSize(getContentSize());
+
+    this->addChildAtPosition(background, Anchor::Center);
+}
+
+void ProgressDescriptorNode::setupMenu() {
     // root menu
     m_rootMenu = CCMenu::create();
     m_rootMenu->setID("progress-descriptor-menu");
@@ -23,16 +45,9 @@ bool ProgressDescriptorNode::init(float width)
                            ->setAxisReverse(false));
 
     this->addChildAtPosition(m_rootMenu, Anchor::Center);
+}
 
-    // background
-    auto background = CCLayerColor::create(PROGRESS_DESCRIPTOR_COLOR_CCC4);
-    background->setID("progress-descriptor-bg");
-    background->ignoreAnchorPointForPosition(false);
-    background->setAnchorPoint({ 0.5, 0.5 });
-    background->setContentSize(getContentSize());
-
-    this->addChildAtPosition(background, Anchor::Center);
-
+void ProgressDescriptorNode::setupDescriptors() {
     // descriptors (name/scale)
     auto descriptors = createVector(managers::SettingsManager::get()->getProgressionSettings());
     _descriptorsPositionsX = std::vector<float>();
@@ -54,12 +69,12 @@ bool ProgressDescriptorNode::init(float width)
     for (auto& child : CCArrayExt<cocos2d::CCNode*>(m_rootMenu->getChildren())) {
         _descriptorsPositionsX.push_back(child->getPositionX());
     }
-
-    return true;
 }
 
-std::vector<std::pair<std::string, float>> ProgressDescriptorNode::createVector(PSFlags flags)
-{
+
+std::vector<std::pair<std::string, float>> ProgressDescriptorNode::createVector(PSFlags flags) {
+    LMDEBUG("Generating descriptors based on selected settings");
+    
     std::vector<std::pair<std::string, float>> vec = {};
 
     vec.push_back({ "Progress", 0.3 });
@@ -77,18 +92,5 @@ std::vector<std::pair<std::string, float>> ProgressDescriptorNode::createVector(
     }
 
     vec.push_back({ "Passed", 0.3 });
-
     return vec;
-}
-
-ProgressDescriptorNode* ProgressDescriptorNode::create(float width)
-{
-    auto ret = new ProgressDescriptorNode();
-    if (ret->init(width)) {
-        ret->autorelease();  
-        return ret;
-    }
-
-    delete ret;
-    return nullptr;
 }

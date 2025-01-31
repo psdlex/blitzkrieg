@@ -8,10 +8,8 @@
 
 using namespace geode::prelude;
 
-namespace managers
-{
-    class PathManager : public SingletonBase<PathManager>, public Initializable
-    {
+namespace managers {
+    class PathManager : public SingletonBase<PathManager>, public Initializable {
         friend class SingletonBase<PathManager>;
 
     private:

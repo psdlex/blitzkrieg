@@ -9,8 +9,7 @@ using namespace geode::prelude;
 
 // ProgressBestRun
 template<>
-struct matjson::Serialize<ProgressBestRun>
-{
+struct matjson::Serialize<ProgressBestRun> {
 	static Result<ProgressBestRun> fromJson(const matjson::Value& value)
 	{
 		ProgressBestRun info;
@@ -33,8 +32,7 @@ struct matjson::Serialize<ProgressBestRun>
 
 // ProgressInfo
 template<>
-struct matjson::Serialize<ProgressInfo>
-{
+struct matjson::Serialize<ProgressInfo> {
 	static Result<ProgressInfo> fromJson(const matjson::Value& value)
 	{
 		ProgressInfo info;
@@ -65,8 +63,7 @@ struct matjson::Serialize<ProgressInfo>
 
 // ProgressionStage
 template<>
-struct matjson::Serialize<ProgressionStage>
-{
+struct matjson::Serialize<ProgressionStage> {
 	static Result<ProgressionStage> fromJson(const matjson::Value& value)
 	{
 		ProgressionStage stage;
@@ -95,8 +92,7 @@ struct matjson::Serialize<ProgressionStage>
 
 // LevelProgression
 template<>
-struct matjson::Serialize<LevelProgression>
-{
+struct matjson::Serialize<LevelProgression> {
 	static Result<LevelProgression> fromJson(const matjson::Value& value)
 	{
 		LevelProgression progression;

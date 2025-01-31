@@ -6,8 +6,7 @@
 #include <algorithm>
 #include "../objects/LevelProgression.hpp"
 
-class ProgressionStageUtil
-{
+class ProgressionStageUtil {
 public:
     static std::vector<ProgressionStage> createStages(const std::set<uint32_t>* percents) {
         std::vector<int> sortedPercents(percents->begin(), percents->end());

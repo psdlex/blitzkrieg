@@ -7,14 +7,12 @@
 using namespace geode::prelude;
 
 template<class... PArgs>
-class CheckableNode : public CCNode 
-{
+class CheckableNode : public CCNode  {
 protected:
     std::function<void(PArgs... args)> m_checkFunc;
 
 protected:
-    void registerCheckable(CCMenuItemToggler* toggler)
-    {
+    void registerCheckable(CCMenuItemToggler* toggler) {
         if (toggler == nullptr) {
             return;
         }
@@ -26,8 +24,7 @@ protected:
     virtual void onCheckImpl(CCObject* sender) = 0;
 
 public:
-    void onCheck(const std::function<void(PArgs... args)>& func)
-    {
+    void onCheck(const std::function<void(PArgs... args)>& func) {
         m_checkFunc = func;
     }
 };

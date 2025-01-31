@@ -13,8 +13,7 @@ struct ProgressInfo {
 
     ProgressBestRun m_bestRun = {};
 
-    void reset()
-    {
+    void reset() {
         m_isPassed = false;
         m_passAmount = 0;
         m_attemptsToPass = 0;

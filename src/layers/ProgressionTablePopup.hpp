@@ -9,6 +9,7 @@
 using namespace geode::prelude;
 
 class ProgressionTablePopup : public geode::Popup<LevelProgression*> {
+protected:
     // data
     LevelProgression* m_progression;
     std::vector<StageNode*> m_stageNodes;
@@ -46,6 +47,7 @@ protected:
 
     void handleChecked(StageNode* node);
     void handleUnchecked(StageNode* node);
+    void saveProgression();
 
     void onFindStartPoses(CCObject*);
     void onResetProgress(CCObject*);
@@ -53,6 +55,7 @@ protected:
     void onStageCheck(StageNode* node, bool checked);
 
     void onApplySearch(CCObject*);
+    
 public:
     static ProgressionTablePopup* create(LevelProgression* progression);
 };

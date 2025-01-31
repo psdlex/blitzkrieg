@@ -5,8 +5,7 @@
 #include <set>
 #include <string>
 
-class StringUtil
-{
+class StringUtil {
 public:
     template <typename T>
     static std::string joinVector(const std::vector<T>& vec, const std::string& separator) {

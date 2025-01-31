@@ -9,7 +9,7 @@
 #define POPUP_TITLE "Blitzkrieg Progression"
 #define TITLE_SCALE 0.45f
 
-#define BACKGROUND_COLOR_RGB 70,82,113
+#define BACKGROUND_COLOR_CCC3B ccc3(70,82,113)
 #define POPUP_SIZE_W 375.0f
 #define POPUP_SIZE_H 225.0f
 

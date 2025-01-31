@@ -4,8 +4,7 @@
 #include <sstream>
 #include <string>
 
-class TypeConversionUtil
-{
+class TypeConversionUtil {
 public:
     static std::string doubleToString(double value, int precision) {
         std::ostringstream out;

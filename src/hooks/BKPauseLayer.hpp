@@ -6,14 +6,16 @@
 #include <Geode/modify/PauseLayer.hpp>
 #include "../objects/LevelProgression.hpp"
 
-class $modify(BKPauseLayer, PauseLayer)
-{
-	void customSetup();
+class $modify(BKPauseLayer, PauseLayer) {
+protected:
 	void createOrLoadProgressTableButton();
 	void createNewProgression();
 	void showProgression(LevelProgression* levelProgression);
 
 	void onShowProgressTable(CCObject*);
+
+public:
+	void customSetup();
 };
 
 #endif // BK_PAUSE_LAYER_HPP

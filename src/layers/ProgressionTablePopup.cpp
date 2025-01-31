@@ -1,20 +1,21 @@
 #include <regex>
-#include "../layers/ProgressionTablePopup.hpp"
+#include "ProgressionTablePopup.hpp"
 #include "../hooks/BKPlayLayer.hpp"
+#include "../managers/LogManager.hpp"
+#include "../ui/EditorButtonWithSprite.hpp"
 #include "../utils/ProgressionStageUtil.hpp"
 #include "../utils/StringUtil.hpp"
 #include "../utils/ScrollUtil.hpp"
+#include "../utils/DialogsUtil.hpp"
 #include "../defines/ProgressionTable.hpp"
 #include "../defines/Fonts.hpp"
 #include "../defines/SquareSprites.hpp"
 #include "../defines/IconSprites.hpp"
-#include "../ui/EditorButtonWithSprite.hpp"
-#include "../managers/LogManager.hpp"
 
 using namespace managers;
 
-bool ProgressionTablePopup::setup(LevelProgression* value)
-{
+bool ProgressionTablePopup::setup(LevelProgression* value) {
+    LMDEBUG("Initializing ProgessionTable");
     m_progression = value;
 
     setupMenus();
@@ -22,11 +23,12 @@ bool ProgressionTablePopup::setup(LevelProgression* value)
     setupManipulationButtons();
     setupSearchControls();
     setupProgressList();
+    loadProgression();
+
     return true;
 }
 
-void ProgressionTablePopup::setupMenus()
-{
+void ProgressionTablePopup::setupMenus() {
     // root menu
     m_rootMenu = CCMenu::create();
     m_rootMenu->setAnchorPoint({ 0, 1 });
@@ -85,8 +87,7 @@ void ProgressionTablePopup::setupMenus()
     m_rootMenu->updateLayout();
 }
 
-void ProgressionTablePopup::setupBasics()
-{
+void ProgressionTablePopup::setupBasics() {
     // title
     m_titleLabel = CCLabelBMFont::create(POPUP_TITLE, BIGFONT);
     m_titleLabel->ignoreAnchorPointForPosition(false);
@@ -97,17 +98,16 @@ void ProgressionTablePopup::setupBasics()
 
     // background color
     auto background = getChildByType<CCLayer*>(0)->getChildByType<CCScale9Sprite*>(0);
-    background->setColor({ BACKGROUND_COLOR_RGB });
+    background->setColor(BACKGROUND_COLOR_CCC3B);
 
     // updating
     m_topMenu->updateLayout();
 }
 
-void ProgressionTablePopup::setupManipulationButtons()
-{
+void ProgressionTablePopup::setupManipulationButtons() {
     // find startposes
     auto checkSprite = CCSprite::createWithSpriteFrameName(FIND_START_POSES_SPRITE);
-    auto findStartposButtonSprite = EditorButtonWithSprite::create(checkSprite, EditorBaseColor::Aqua, 1.3f, MANIPULATION_BUTTONS_HEIGHT);
+    auto findStartposButtonSprite = EditorButtonWithSprite::createNode(checkSprite, EditorBaseColor::Aqua, 1.3f, MANIPULATION_BUTTONS_HEIGHT);
     auto findStartPosesButton = CCMenuItemSpriteExtra::create(findStartposButtonSprite, this, menu_selector(ProgressionTablePopup::onFindStartPoses));
     findStartPosesButton->ignoreAnchorPointForPosition(false);
     findStartPosesButton->setID("progression-table-find-startposes");
@@ -116,7 +116,7 @@ void ProgressionTablePopup::setupManipulationButtons()
 
     // reset progress
     auto resetSprite = CCSprite::createWithSpriteFrameName(RESET_SPRITE);
-    auto resetProgressButtonSprite = EditorButtonWithSprite::create(resetSprite, EditorBaseColor::Aqua, 1.3f, MANIPULATION_BUTTONS_HEIGHT);
+    auto resetProgressButtonSprite = EditorButtonWithSprite::createNode(resetSprite, EditorBaseColor::Aqua, 1.3f, MANIPULATION_BUTTONS_HEIGHT);
     auto resetProgressButton = CCMenuItemSpriteExtra::create(resetProgressButtonSprite, this, menu_selector(ProgressionTablePopup::onResetProgress));
     resetProgressButton->ignoreAnchorPointForPosition(false);
     resetProgressButton->setID("progression-table-reset-progress");
@@ -125,7 +125,7 @@ void ProgressionTablePopup::setupManipulationButtons()
 
     // delete progress
     auto deleteSprite = CCSprite::createWithSpriteFrameName(DELETE_ICON_SPRITE);
-    auto deleteProgressButtonSprite = EditorButtonWithSprite::create(deleteSprite, EditorBaseColor::Aqua, 1.1f, MANIPULATION_BUTTONS_HEIGHT);
+    auto deleteProgressButtonSprite = EditorButtonWithSprite::createNode(deleteSprite, EditorBaseColor::Aqua, 1.1f, MANIPULATION_BUTTONS_HEIGHT);
     auto deleteButtonProgress = CCMenuItemSpriteExtra::create(deleteProgressButtonSprite, this, menu_selector(ProgressionTablePopup::onDeleteProgress));
     deleteButtonProgress->ignoreAnchorPointForPosition(false);
     deleteButtonProgress->setID("progression-table-reset-progress");
@@ -136,8 +136,7 @@ void ProgressionTablePopup::setupManipulationButtons()
     m_manipulationButtonsMenu->updateLayout();
 }
 
-void ProgressionTablePopup::setupSearchControls()
-{
+void ProgressionTablePopup::setupSearchControls() {
     // percentage input
     m_percentageInput = TextInput::create(300, "Percentages (ex: 10,25,50 ...)");
     m_percentageInput->setTextAlign(TextInputAlign::Left);
@@ -150,7 +149,7 @@ void ProgressionTablePopup::setupSearchControls()
 
     // apply input
     auto applySprite = CCSprite::createWithSpriteFrameName(CHECK_ICON_SPRITE);
-    auto applyButtonSprite = EditorButtonWithSprite::create(applySprite, EditorBaseColor::Aqua, 1.3f, m_percentageInput->getScaledContentHeight() + 2);
+    auto applyButtonSprite = EditorButtonWithSprite::createNode(applySprite, EditorBaseColor::Aqua, 1.3f, m_percentageInput->getScaledContentHeight() + 2);
     auto applyButton = CCMenuItemSpriteExtra::create(applyButtonSprite, this, menu_selector(ProgressionTablePopup::onApplySearch));
     applyButton->ignoreAnchorPointForPosition(false);
     applyButton->setID("progression-table-apply-button");
@@ -161,8 +160,7 @@ void ProgressionTablePopup::setupSearchControls()
     m_searchMenu->updateLayout();
 }
 
-void ProgressionTablePopup::setupProgressList()
-{
+void ProgressionTablePopup::setupProgressList() {
     // no progress label
     m_noProgressLabel = CCLabelBMFont::create("Insert start-poses above to start tracking your progress!", BIGFONT);
     m_noProgressLabel->setCascadeOpacityEnabled(true);
@@ -177,20 +175,19 @@ void ProgressionTablePopup::setupProgressList()
     m_stagesScrollLayer->setAnchorPoint({ 0.5, 0.5 });
     m_stagesScrollLayer->ignoreAnchorPointForPosition(false);
     m_stagesScrollLayer->m_contentLayer->setLayout(ColumnLayout::create()
-                                                    ->setGap(5)
-                                                    ->setAxisReverse(true)
-                                                    ->setAxisAlignment(AxisAlignment::End)
-                                                    ->setAutoGrowAxis(m_stagesScrollLayer->getContentHeight()));
+                                                               ->setGap(5)
+                                                               ->setAxisReverse(true)
+                                                               ->setAxisAlignment(AxisAlignment::End)
+                                                               ->setAutoGrowAxis(m_stagesScrollLayer->getContentHeight()));
 
     m_progressionMenu->addChildAtPosition(m_stagesScrollLayer, Anchor::Center);
-    
-    loadProgression();
 }
 
 
-void ProgressionTablePopup::onFindStartPoses(CCObject*)
-{
+void ProgressionTablePopup::onFindStartPoses(CCObject*) {
+    LMDEBUG("Trying to find startposes");
     if (m_progression->m_startPosPercents.size() < 1) {
+        LMWARN("No cached startposes found, trying to play through!");
         static_cast<BKPlayLayer*>(BKPlayLayer::get())->playThroughoutStartposes(m_progression);
     }
 
@@ -198,79 +195,89 @@ void ProgressionTablePopup::onFindStartPoses(CCObject*)
     m_percentageInput->setString(joined);
 }
 
-void ProgressionTablePopup::onResetProgress(CCObject*)
-{
-    createQuickPopup("Progress Reset", "Are you sure you want to reset your entire progress?", "No", "Yes", [this](auto, bool isYes){
-        if (!isYes) {
-            return;
+void ProgressionTablePopup::onResetProgress(CCObject*) {
+    LMDEBUG("Prompting progress reset");
+    DialogsUtil::showChoice("Progress Reset", "Are you sure you want to <co>reset your entire progress?</c>", "No", "Yes", [this](auto button)
+    {
+        if (button == DialogsUtil::ButtonResult::Right) {
+            LMINFO("Resetting progress!");
+            m_progression->reset();
+            loadProgression();
         }
-
-        m_progression->reset();
-        loadProgression();
     });
 }
 
-void ProgressionTablePopup::onDeleteProgress(CCObject*)
-{
-    createQuickPopup("Table Deconstruction", "Are you sure you want to remove progression table for this level?", "No", "Yes", [this](auto, bool isYes){
-        if (!isYes) {
+void ProgressionTablePopup::onDeleteProgress(CCObject*) {
+    LMDEBUG("Prompting table deconstruction for the current level");
+    DialogsUtil::showChoice("Table Deconstruction", "Are you sure you want to <co>remove progression table</c> for <cb>this level</c>?", "No", "Yes", [this](auto button) {
+        if (button == DialogsUtil::ButtonResult::Left) {
             return;
         }
 
-        auto removeResult = LevelProgressionManager::get()->removeProgression(PlayLayer::get()->m_level); // idk how else to obtain it
+        LMDEBUG("Proceeding to deconstruct the table for the current level");
+        auto removeResult = LevelProgressionManager::get()->removeProgression(PlayLayer::get()->m_level);
 
         if (removeResult.isOk()) {
+            LMINFO("Table deconstructed successfully");
             onClose(this);
         } else {
-            LogManager::get()->error("couldnt remove table: {}", removeResult.unwrapErr());
-            FLAlertLayer::create("Remove Failed", "Something went wrong.. Try again", "Ok");
+            LMERROR("Couldn't remove table, error: {}", removeResult.unwrapErr());
+            DialogsUtil::showAlert("Remove Failed", "<cr>Something went wrong</c>.. Try again");
         }
     });
 }
 
-void ProgressionTablePopup::onApplySearch(CCObject*)
-{
+void ProgressionTablePopup::onApplySearch(CCObject*) {
+    LMDEBUG("Prompting search-apply");
+
     auto text = m_percentageInput->getString();
     if (text.size() < 1 || hasInvalidCharacters(text)) {
         return;
     }
 
-    if (m_progression->m_stages.size() > 0)
-    {
-        createQuickPopup("Confirmation", "Are you sure you want to clear and replace your stages?", "No", "Yes", [text, this](auto, bool isYes)
-        {
-            if (!isYes) {
+    if (m_progression->m_stages.size() > 0) {
+        LMWARN("Existing stages found.. Prompting to replace and reset them");
+
+        DialogsUtil::showChoice("Replace Stages", "Are you sure you want to <co>clear and replace your stages</c>?", "No", "Yes", [text, this](auto button) {
+            if (button == DialogsUtil::ButtonResult::Left) {
                 return;
             }
 
+            LMINFO("Replacing stages for the current level");
             parseProgression(text);
             loadProgression();
+            saveProgression();
         });
     }
-    else
-    {
+    else {
+        LMDEBUG("Applying search without replace");
         parseProgression(text);
         loadProgression();
+        saveProgression();
     }
 }
 
-void ProgressionTablePopup::onClose(CCObject* x)
-{
+void ProgressionTablePopup::onClose(CCObject* x) {
+    LMDEBUG("Table is closing...");
     m_scrollLayerPositionY = m_stagesScrollLayer->m_contentLayer->getPositionY();
     Popup::onClose(x);
 }
 
-void ProgressionTablePopup::onStageCheck(StageNode* node, bool checked)
-{
+void ProgressionTablePopup::onStageCheck(StageNode* node, bool checked) {
+    LMDEBUG("Handling stage check");
     if (checked) {
         handleChecked(node);
     } else {
         handleUnchecked(node);
     }
+
+    saveProgression();
 }
 
-void ProgressionTablePopup::handleChecked(StageNode* node)
-{
+
+void ProgressionTablePopup::handleChecked(StageNode* node) {
+    LMDEBUG("Handling stage on-check");
+
     uint32_t index = node->getStageIndex();
     bool lastStage = (index + 1) == m_stageNodes.size();
 
@@ -286,8 +293,9 @@ void ProgressionTablePopup::handleChecked(StageNode* node)
     }
 }
 
-void ProgressionTablePopup::handleUnchecked(StageNode* node)
-{
+void ProgressionTablePopup::handleUnchecked(StageNode* node) {
+    LMDEBUG("Handling stage off-check");
+
     uint32_t index = node->getStageIndex();
     bool lastStage = (index + 1) == m_stageNodes.size();
 
@@ -312,8 +320,20 @@ void ProgressionTablePopup::handleUnchecked(StageNode* node)
     }
 }
 
-void ProgressionTablePopup::parseProgression(const std::string text)
-{
+void ProgressionTablePopup::saveProgression() {
+    LMDEBUG("Trying to save progress");
+    auto result = LevelProgressionManager::get()->saveProgression(PlayLayer::get()->m_level, m_progression);
+
+    if (!result.isOk()) {
+        LMERROR("Couldn't save level progression:((");
+    } else {
+        LMINFO("Save progression successfully");
+    }
+}
+
+void ProgressionTablePopup::parseProgression(const std::string text) {
+    LMDEBUG("Proceeding to parse progression");
+
     std::set<uint32_t> parsed;
 
     if (!text.find(","))
@@ -339,15 +359,16 @@ void ProgressionTablePopup::parseProgression(const std::string text)
     m_scrollLayerPositionY = std::nullopt; // discarding
 }
 
-void ProgressionTablePopup::loadProgression()
-{    
+void ProgressionTablePopup::loadProgression() {
+    LMDEBUG("Proceeding to load progression");
+
     m_noProgressLabel->setVisible(m_progression->m_stages.size() < 1);
     m_stagesScrollLayer->m_contentLayer->removeAllChildren();
     m_stageNodes = {};
 
     for (auto& stage : m_progression->m_stages)
     {
-        auto node = StageNode::create(&stage, m_stagesScrollLayer->m_contentLayer->getContentWidth());
+        auto node = StageNode::createNode(&stage, [&]() { ProgressionTablePopup::saveProgression(); }, m_stagesScrollLayer->m_contentLayer->getContentWidth());
         node->onCheck([&](StageNode* node, bool checked) { ProgressionTablePopup::onStageCheck(node, checked); });
         
         m_stagesScrollLayer->m_contentLayer->addChild(node);
@@ -375,7 +396,7 @@ ProgressionTablePopup* ProgressionTablePopup::create(LevelProgression* progressi
         popup->autorelease();
         return popup;
     }
-    
-    delete popup;
+
+    CC_SAFE_DELETE(popup);
     return nullptr;
 }

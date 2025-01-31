@@ -1,15 +1,18 @@
-#include "../ProgressionTable/StageNode.hpp"
-#include "../ProgressionTable/ProgressDescriptorNode.hpp"
+#include "StageNode.hpp"
+#include "ProgressDescriptorNode.hpp"
 #include "../../defines/ProgressNode.hpp"
 #include "../../defines/ProgressionStageNode.hpp"
 #include "../../defines/Fonts.hpp"
 
-bool StageNode::init(ProgressionStage* stage, float width)
-{
+bool StageNode::init(ProgressionStage* stage, std::function<void()> saveFunc, float width) {
+    LMDEBUG("Initializing StageNode");
+
     if (!CCNode::init()) {
+        LMERROR("Failed to initialize StageNode (CCNode init failed)");
         return false;
     }
 
+    m_saveFunc = saveFunc;
     m_progressionStage = stage;
     m_menuWidth = width;
 
@@ -26,10 +29,11 @@ bool StageNode::init(ProgressionStage* stage, float width)
     return true;
 }
 
-void StageNode::setupBasics(float width)
-{
+void StageNode::setupBasics(float width) {
     // data (stage menu) + (size() + 1 for progress descriptor (progress, atts, pass amount, etc...))
-    m_menuHeight = ((m_progressionStage->m_progresses.size() + 1) * (PROGRESS_HEIGHT + PROGRESS_MARGIN) - PROGRESS_MARGIN) + (STAGE_MENU_HEIGHT + STAGE_MENU_MARGIN) + (ROOT_MENU_MARGIN * 2);
+    m_menuHeight = ((m_progressionStage->m_progresses.size() + 1) * (PROGRESS_HEIGHT + PROGRESS_MARGIN) - PROGRESS_MARGIN) + 
+                                                                    (STAGE_MENU_HEIGHT + STAGE_MENU_MARGIN) +
+                                                                    (ROOT_MENU_MARGIN * 2);
 
     // content size
     setContentSize({ m_menuWidth, m_menuHeight });
@@ -44,8 +48,7 @@ void StageNode::setupBasics(float width)
     this->addChildAtPosition(m_background, Anchor::Center);
 }
 
-void StageNode::setupMenus()
-{
+void StageNode::setupMenus() {
     // root menu
     m_rootMenu = CCMenu::create();
     m_rootMenu->setAnchorPoint({ 0, 1 });
@@ -53,9 +56,9 @@ void StageNode::setupMenus()
     m_rootMenu->setContentSize({ m_menuWidth - ROOT_MENU_MARGIN * 2, m_menuHeight - ROOT_MENU_MARGIN * 2 });
     m_rootMenu->setID("stage-root-menu");
     m_rootMenu->setLayout(ColumnLayout::create()
-                          ->setAxisReverse(true)
-                          ->setGap(STAGE_MENU_MARGIN)
-                          ->setAxisAlignment(AxisAlignment::End));
+                                      ->setAxisReverse(true)
+                                      ->setGap(STAGE_MENU_MARGIN)
+                                      ->setAxisAlignment(AxisAlignment::End));
 
     this->addChildAtPosition(m_rootMenu, Anchor::TopLeft, { ROOT_MENU_MARGIN, -ROOT_MENU_MARGIN });
 
@@ -78,9 +81,9 @@ void StageNode::setupMenus()
     m_progressInfosMenu->setContentSize({ m_menuWidth, m_rootMenu->getContentHeight() - STAGE_MENU_HEIGHT - STAGE_MENU_MARGIN });
     m_progressInfosMenu->setID("stage-progress-menu");
     m_progressInfosMenu->setLayout(ColumnLayout::create()
-                                   ->setGap(PROGRESS_MARGIN)
-                                   ->setAxisReverse(true)
-                                   ->setAxisAlignment(AxisAlignment::End));
+                                               ->setGap(PROGRESS_MARGIN)
+                                               ->setAxisReverse(true)
+                                               ->setAxisAlignment(AxisAlignment::End));
 
     m_rootMenu->addChild(m_progressInfosMenu);
 
@@ -106,8 +109,7 @@ void StageNode::setupMenus()
     m_rootMenu->updateLayout();
 }
 
-void StageNode::setupStage()
-{
+void StageNode::setupStage() {
     // stage info
     m_stageIndexLabel = CCLabelBMFont::create(std::format("Stage {0}", m_progressionStage->m_stage).c_str(), BIGFONT);
     m_stageIndexLabel->setScale(0.5);
@@ -128,15 +130,14 @@ void StageNode::setupStage()
     m_stageMenu->addChildAtPosition(m_passToggler, Anchor::Right);
 }
 
-void StageNode::setupProgresses()
-{
-    auto progressDescriptor = ProgressDescriptorNode::create(m_menuWidth);
+void StageNode::setupProgresses() {
+    auto progressDescriptor = ProgressDescriptorNode::createNode(m_menuWidth);
     m_progressInfosMenu->addChild(progressDescriptor);
 
-    for (auto& progress : m_progressionStage->m_progresses)
-    {
-        auto progressNode = ProgressNode::create(&progress, m_menuWidth, progressDescriptor->getDescriptorsPositions());
+    for (auto& progress : m_progressionStage->m_progresses) {
+        auto progressNode = ProgressNode::createNode(&progress, m_menuWidth, progressDescriptor->getDescriptorsPositions());
         progressNode->onCheck([&](ProgressNode* node, bool checked) { onProgressCheck(node, checked); });
+
         m_progressInfosMenu->addChild(progressNode);
         m_progressNodes.push_back(progressNode);
     }
@@ -145,47 +146,40 @@ void StageNode::setupProgresses()
 }
 
 
-void StageNode::onCheckImpl(CCObject* sender)
-{
+void StageNode::onCheckImpl(CCObject* sender) {
+    LMDEBUG("Toggler clicker event raised for StageNode");
+    
     auto toggler = static_cast<CCMenuItemToggler*>(sender);
     if (!toggler) {
         return;
     }
 
-    bool toggled = !toggler->m_toggled;
-    if (toggled == true && !allNodesChecked()) {
+    bool toggled = !toggler->isToggled();
+    if (toggled == true && !areAllNodesChecked()) {
         toggler->m_toggled = !(false); // reverse again
         return;
     }
 
     m_checkFunc(this, toggled);
+    m_saveFunc();
 }
 
-void StageNode::onProgressCheck(ProgressNode* node, bool checked)
-{
+void StageNode::onProgressCheck(ProgressNode* node, bool checked) {
+    // handling progress check from stage class because its desicive for the stage as well
+    LMDEBUG("Handling progress check for stage: {}", m_progressionStage->m_stage);
+
     // cant uncheck progress while stage is checked
-    if (checked == false && m_progressionStage->m_isPassed)
-    {
+    if (checked == false && m_progressionStage->m_isPassed) {
         node->setPassed(!(true)); // reverse
     }
+
+    m_saveFunc();
 }
 
 
-StageNode* StageNode::create(ProgressionStage* stage, float width)
-{
-    auto ret = new StageNode();
-    if (ret->init(stage, width)) {
-        ret->autorelease();  
-        return ret;
-    }
+void StageNode::setEnabled(bool isTrue) {
+    LMDEBUG("Changing state 'enabled' for stage {}: {}", m_progressionStage->m_stage, isTrue);
 
-    delete ret;
-    return nullptr;
-}
-
-
-void StageNode::setEnabled(bool isTrue)
-{
     m_progressionStage->m_isAvailable = isTrue;
     m_blockingLayer->setVisible(!isTrue);
     m_stageMenu->setEnabled(isTrue);
@@ -195,8 +189,9 @@ void StageNode::setEnabled(bool isTrue)
     }
 }
 
-void StageNode::setPassed(bool isTrue, bool setToChildren, bool reverse)
-{
+void StageNode::setPassed(bool isTrue, bool setToChildren, bool reverse) {
+    LMDEBUG("Changing state 'passed' for stage {}: {}", m_progressionStage->m_stage, isTrue);
+
     m_progressionStage->m_isPassed = isTrue;
     m_passToggler->toggle(reverse ? !isTrue : isTrue);
     m_passedLayer->setVisible(isTrue);
@@ -210,13 +205,14 @@ void StageNode::setPassed(bool isTrue, bool setToChildren, bool reverse)
     }
 }
 
-void StageNode::setActive(bool isTrue)
-{
+void StageNode::setActive(bool isTrue) {
+    LMDEBUG("Changing state 'active' for stage {}: {}", m_progressionStage->m_stage, isTrue);
     m_progressionStage->m_isActive = isTrue;
 }
 
-bool StageNode::allNodesChecked()
-{
+bool StageNode::areAllNodesChecked() {
+    LMDEBUG("Checking if all progresses are checked");
+
     bool result = true;
     for (auto& node : m_progressNodes) {
         result = result && node->isChecked();

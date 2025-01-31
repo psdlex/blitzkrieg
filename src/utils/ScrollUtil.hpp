@@ -5,21 +5,17 @@
 
 using namespace geode::prelude;
 
-class ScrollUtil
-{
+class ScrollUtil {
 public:
-    static void scrollToTop(const geode::ScrollLayer* scrollLayer)
-    {
+    static void scrollToTop(const geode::ScrollLayer* scrollLayer) {
         scrollLayer->m_contentLayer->setPositionY(scrollLayer->getContentHeight() - scrollLayer->m_contentLayer->getContentHeight());
     }
 
-    static void scrollToBottom(const geode::ScrollLayer* scrollLayer)
-    {
+    static void scrollToBottom(const geode::ScrollLayer* scrollLayer) {
         scrollLayer->m_contentLayer->setPositionY(0);
     }
 
-    static void scrollToPosition(const geode::ScrollLayer* scrollLayer, int32_t position)
-    {
+    static void scrollToPosition(const geode::ScrollLayer* scrollLayer, int32_t position) {
         scrollLayer->m_contentLayer->setPositionY(position);
     }
 

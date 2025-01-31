@@ -4,16 +4,14 @@
 
 #include <Geode/Geode.hpp>
 #include <Geode/modify/PlayLayer.hpp>
-#include "../objects/LevelProgression.hpp"
 #include "../managers/LevelProgressionManager.hpp"
+#include "../objects/LevelProgression.hpp"
 
 using namespace geode::prelude;
 using namespace managers;
 
-class $modify(BKPlayLayer, PlayLayer)
-{
-    struct Fields
-    {
+class $modify(BKPlayLayer, PlayLayer) {
+    struct Fields {
         LevelProgression* m_progression;
         std::vector<StartPosObject*> m_startPoses;
     };

@@ -105,32 +105,13 @@
 			"name": "Debug Settings"
 		},
 
-		"debug-enable": {
-			"name": "Enable Mod's Debug Messages",
-			"type": "bool",
-			"default": false,
-			"requires-restart": false
-		},
-
-		"debug-display-info": {
-			"name": "Display Info Messages",
-			"type": "bool",
-			"default": true,
-			"requires-restart": false
-		},
-
-		"debug-display-warnings": {
-			"name": "Display Warning Messages",
-			"type": "bool",
-			"default": true,
-			"requires-restart": false
-		},
-
-		"debug-display-errors": {
-			"name": "Display Error Messages",
-			"type": "bool",
-			"default": true,
-			"requires-restart": false
+		"debug-type": {
+			"name": "Blitzkrieg Debug Type",
+			"type": "string",
+			"description": "Enables mod's real-time logging,",
+			"default": "Disabled",
+			"requires-restart": false,
+			"one-of": [ "Disabled", "Errors & Warnings", "Descriptive" ]
 		}
 	}
 }

@@ -2,11 +2,11 @@
 #ifndef INITIABLE_HPP
 #define INITIABLE_HPP
 
-#include "Geode/Result.hpp"
-#include <vector>
+#include "Geode/Geode.hpp"
 
-class Initializable
-{
+using namespace geode::prelude;
+
+class Initializable {
 public:
     virtual Result<> init() = 0;
 };

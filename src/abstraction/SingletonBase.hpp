@@ -1,3 +1,4 @@
+#pragma once
 #ifndef SINGLETON_BASE_HPP
 #define SINGLETON_BASE_HPP
 
