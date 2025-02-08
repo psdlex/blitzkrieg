@@ -29,6 +29,9 @@ bool BKPlayLayerTracker::init(GJGameLevel* level, bool useReplay, bool dontCreat
 
 void BKPlayLayerTracker::resetLevel() {
     PlayLayer::resetLevel();
+
+    LMDEBUG("Reset level called");
+    m_fields->m_noclipDetected = false;
     auto currentPerc = getCurrentPercent();
 
     if (m_fields->m_progression == nullptr) {
@@ -51,10 +54,19 @@ void BKPlayLayerTracker::resetLevel() {
     }
 }
 
-void BKPlayLayerTracker::destroyPlayer(PlayerObject* player, GameObject* p1) {
-    PlayLayer::destroyPlayer(player, p1);
+void BKPlayLayerTracker::destroyPlayer(PlayerObject* player, GameObject* obj) {
+    if (m_anticheatSpike && obj == m_anticheatSpike) {
+        return PlayLayer::destroyPlayer(player, obj);
+    }
 
+    PlayLayer::destroyPlayer(player, obj);
     if (!player->m_isDead) {
+        m_fields->m_noclipDetected = true;
+        return;
+    }
+
+    if (m_fields->m_noclipDetected) {
+        LMWARN("Noclip detected, progress wont be registered");
         return;
     }
 
@@ -64,6 +76,12 @@ void BKPlayLayerTracker::destroyPlayer(PlayerObject* player, GameObject* p1) {
 
 void BKPlayLayerTracker::levelComplete() {
     PlayLayer::levelComplete();
+
+    if (m_fields->m_noclipDetected) {
+        LMWARN("Noclip detected, progress wont be registered");
+        return;
+    }
+
     processProgress(100.0f);
 }
 

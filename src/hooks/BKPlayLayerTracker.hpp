@@ -6,14 +6,24 @@
 #include "Geode/modify/PlayLayer.hpp"
 #include "../objects/LevelProgression.hpp"
 
+using namespace geode::prelude;
+
 class $modify(BKPlayLayerTracker, PlayLayer) {
     struct Fields {
         float m_fromPercent;
+
         bool m_autoCheck = false;
+        bool m_noclipDetected = false;
+
         LevelProgression* m_progression;
         ProgressionStage* m_currentStage;
         ProgressInfo* m_currentProgress;
+
     };
+
+    static void onModify(auto& self) {
+        (void)self.setHookPriorityPost("PlayLayer::destroyPlayer", Priority::Last);
+    }
 
     void resetLevel();
     void levelComplete() ;
