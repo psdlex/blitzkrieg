@@ -5,6 +5,7 @@
 #include "../objects/LevelProgression.hpp"
 #include "../layers/ProgressionTablePopup.hpp"
 #include "../utils/DialogsUtil.hpp"
+#include "../utils/TableButtonUtil.hpp"
 #include "../defines/PauseLayer.hpp"
 
 using namespace geode::prelude;
@@ -18,20 +19,20 @@ void BKPauseLayer::customSetup() {
 }
 
 void BKPauseLayer::createOrLoadProgressTableButton() {
-    auto menu = this->getChildByID(RIGHT_BUTTON_MENU_ID);
+    auto menu = this->getChildByID(PAUSE_LAYER_RIGHT_BUTTON_MENU_ID);
     if (!menu) {
-        LMERROR("Menu '{}' not found.. ?", RIGHT_BUTTON_MENU_ID);
+        LMERROR("Menu '{}' not found.. ?", PAUSE_LAYER_RIGHT_BUTTON_MENU_ID);
         return;
     }
 
-    LMINFO("Menu '{}' found", RIGHT_BUTTON_MENU_ID);    
+    LMINFO("Menu '{}' found", PAUSE_LAYER_RIGHT_BUTTON_MENU_ID);    
     auto button = CCMenuItemSpriteExtra::create(
-        CircleButtonSprite::createWithSpriteFrameName(BLITZKRIEG_SPRITE_ID, 0.85, CircleBaseColor::Blue, CircleBaseSize::Tiny),
+        TableButtonUtil::createTableButtonSprite(),
         this,
         menu_selector(BKPauseLayer::onShowProgressTable)
     );
 
-    button->setID("blitzkrieg-show-table");
+    button->setID(BLITKRIEG_BUTTON_ID);
 
     menu->addChildAtPosition(button, Anchor::Center);
     menu->updateLayout();

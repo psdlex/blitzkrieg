@@ -1,3 +1,4 @@
+#pragma once
 #ifndef TYPE_CONVERSION_UTIL
 #define TYPE_CONVERSION_UTIL
 

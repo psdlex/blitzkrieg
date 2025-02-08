@@ -1,0 +1,7 @@
+#pragma once
+#ifndef END_LEVEL_LAYER_DEFINES_HPP
+#define END_LEVEL_LAYER_DEFINES_HPP
+
+#define END_LAYER_HIDE_LAYER_MENU_ID "hide-layer-menu"
+
+#endif // END_LEVEL_LAYER_DEFINES_HPP

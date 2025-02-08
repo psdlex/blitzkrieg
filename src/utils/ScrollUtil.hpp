@@ -1,3 +1,4 @@
+#pragma once
 #ifndef SCROLL_UTIL_HPP
 #define SCROLL_UTIL_HPP
 
