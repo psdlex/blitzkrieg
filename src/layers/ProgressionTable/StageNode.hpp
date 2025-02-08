@@ -11,12 +11,11 @@
 
 using namespace geode::prelude;
 
-class StageNode : public CheckableNode<StageNode*, bool>, public NodeInitiator<StageNode, ProgressionStage*, std::function<void()>, float> {
-    friend class NodeInitiator<StageNode, ProgressionStage*, std::function<void()>, float>;
+class StageNode : public CheckableNode<StageNode*, bool>, public NodeInitiator<StageNode, ProgressionStage*, float> {
+    friend class NodeInitiator<StageNode, ProgressionStage*, float>;
 
 protected:
     // data
-    std::function<void()> m_saveFunc;
     ProgressionStage* m_progressionStage;
     
     float m_menuWidth;
@@ -38,7 +37,7 @@ protected:
     std::vector<ProgressNode*> m_progressNodes;
 
 protected:
-    bool init(ProgressionStage* stage, std::function<void()> saveFunc, float width);
+    bool init(ProgressionStage* stage, float width);
 
     void setupMenus();
     void setupBasics(float width);

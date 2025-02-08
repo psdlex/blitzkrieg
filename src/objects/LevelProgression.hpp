@@ -14,6 +14,16 @@ struct LevelProgression {
             stage.reset();
         }
     }
+
+    ProgressionStage* getActiveStage() {
+        for (auto& stage : m_stages) {
+            if (stage.m_isActive) {
+                return &stage;
+            }
+        }
+
+        return nullptr;
+    }
 };
 
 #endif // LEVEL_PROGRESSION_HPP

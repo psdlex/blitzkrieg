@@ -1,4 +1,5 @@
 #include <regex>
+#include <thread>
 #include "ProgressionTablePopup.hpp"
 #include "../hooks/BKPlayLayer.hpp"
 #include "../managers/LogManager.hpp"
@@ -24,6 +25,7 @@ bool ProgressionTablePopup::setup(LevelProgression* value) {
     setupSearchControls();
     setupProgressList();
     loadProgression();
+    saveProgression();
 
     return true;
 }
@@ -188,6 +190,7 @@ void ProgressionTablePopup::onFindStartPoses(CCObject*) {
     LMDEBUG("Trying to find startposes");
     if (m_progression->m_startPosPercents.size() < 1) {
         LMWARN("No cached startposes found, trying to play through!");
+
         static_cast<BKPlayLayer*>(BKPlayLayer::get())->playThroughoutStartposes(m_progression);
     }
 
@@ -246,21 +249,13 @@ void ProgressionTablePopup::onApplySearch(CCObject*) {
             LMINFO("Replacing stages for the current level");
             parseProgression(text);
             loadProgression();
-            saveProgression();
         });
     }
     else {
         LMDEBUG("Applying search without replace");
         parseProgression(text);
         loadProgression();
-        saveProgression();
     }
-}
-
-void ProgressionTablePopup::onClose(CCObject* x) {
-    LMDEBUG("Table is closing...");
-    m_scrollLayerPositionY = m_stagesScrollLayer->m_contentLayer->getPositionY();
-    Popup::onClose(x);
 }
 
 void ProgressionTablePopup::onStageCheck(StageNode* node, bool checked) {
@@ -270,8 +265,13 @@ void ProgressionTablePopup::onStageCheck(StageNode* node, bool checked) {
     } else {
         handleUnchecked(node);
     }
+}
 
+void ProgressionTablePopup::onClose(CCObject* x) {
+    LMDEBUG("Table is closing...");
+    m_scrollLayerPositionY = m_stagesScrollLayer->m_contentLayer->getPositionY();
     saveProgression();
+    Popup::onClose(x);
 }
 
 
@@ -319,6 +319,7 @@ void ProgressionTablePopup::handleUnchecked(StageNode* node) {
         nextStage->setEnabled(false);
     }
 }
+
 
 void ProgressionTablePopup::saveProgression() {
     LMDEBUG("Trying to save progress");
@@ -368,7 +369,7 @@ void ProgressionTablePopup::loadProgression() {
 
     for (auto& stage : m_progression->m_stages)
     {
-        auto node = StageNode::createNode(&stage, [&]() { ProgressionTablePopup::saveProgression(); }, m_stagesScrollLayer->m_contentLayer->getContentWidth());
+        auto node = StageNode::createNode(&stage, m_stagesScrollLayer->m_contentLayer->getContentWidth());
         node->onCheck([&](StageNode* node, bool checked) { ProgressionTablePopup::onStageCheck(node, checked); });
         
         m_stagesScrollLayer->m_contentLayer->addChild(node);

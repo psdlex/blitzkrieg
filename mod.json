@@ -1,5 +1,6 @@
 {
 	"geode": "4.2.0",
+	"tags": ["interface", "gameplay", "enhancement", "offline", "developer"],
 	"gd": {
 		"win": "2.2074",
 		"android": "2.2074",
@@ -10,7 +11,7 @@
 	"name": "Blitzkrieg",
 	"version": "v1.0.0",
 	"developer": "lexpsd",
-	"description": "Free version of the mod made for convenient progression in any level you have a commitment to beat or to set progresses on! Inspired and based on Rudder's progression method named \"Blitzkrieg\"!",
+	"description": "Consistency is Skill",
 
 	"resources": {
 		"spritesheets": {

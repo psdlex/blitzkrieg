@@ -4,7 +4,7 @@
 #include "../../defines/ProgressionStageNode.hpp"
 #include "../../defines/Fonts.hpp"
 
-bool StageNode::init(ProgressionStage* stage, std::function<void()> saveFunc, float width) {
+bool StageNode::init(ProgressionStage* stage, float width) {
     LMDEBUG("Initializing StageNode");
 
     if (!CCNode::init()) {
@@ -12,7 +12,6 @@ bool StageNode::init(ProgressionStage* stage, std::function<void()> saveFunc, fl
         return false;
     }
 
-    m_saveFunc = saveFunc;
     m_progressionStage = stage;
     m_menuWidth = width;
 
@@ -161,7 +160,6 @@ void StageNode::onCheckImpl(CCObject* sender) {
     }
 
     m_checkFunc(this, toggled);
-    m_saveFunc();
 }
 
 void StageNode::onProgressCheck(ProgressNode* node, bool checked) {
@@ -172,8 +170,6 @@ void StageNode::onProgressCheck(ProgressNode* node, bool checked) {
     if (checked == false && m_progressionStage->m_isPassed) {
         node->setPassed(!(true)); // reverse
     }
-
-    m_saveFunc();
 }
 
 

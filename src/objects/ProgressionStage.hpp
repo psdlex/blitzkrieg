@@ -21,6 +21,25 @@ struct ProgressionStage {
             progress.reset();
         }
     }
+
+    ProgressInfo* getProgressInfoByStartingPercent(int percent) {
+        for (auto& progress : m_progresses) {
+            if (progress.m_fromPercent == percent) {
+                return &progress;
+            }
+        }
+
+        return nullptr;
+    }
+
+    bool allProgressesPassed() {
+        bool all = true;
+        for (auto& progress : m_progresses) {
+            all &= progress.m_isPassed;
+        }
+
+        return all;
+    }
 };
 
 #endif // PROGRESSION_STAGE_HPP

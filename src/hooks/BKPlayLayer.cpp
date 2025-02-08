@@ -1,18 +1,19 @@
 #include "BKPlayLayer.hpp"
 #include "../managers/LogManager.hpp"
+#include "../defines/PlayLayer.hpp"
+#include "chrono"
+#include "thread"
 
 bool BKPlayLayer::init(GJGameLevel* level, bool useReplay, bool dontCreateObjects) {
     LMDEBUG("Initializing BKPlayLayer");
-    auto settings = Mod::get()->getSavedSettingsData();
-
-    LMDEBUG("Obtaining cached progression for current level");    
+    
     auto cached = LevelProgressionManager::get()->getCachedProgression(level);
     if (cached.isOk()) {
         LMINFO("Cached progression found");    
         m_fields->m_progression = cached.unwrap();
     }
     else {
-        LMINFO("Cached progression not found, trying to read the file");    
+        LMWARN("Cached progression not found, trying to read the file");    
         auto fileProgression = LevelProgressionManager::get()->getProgression(level);
         if (fileProgression.isOk()) {
             LMWARN("Filed progression not found");    
@@ -35,7 +36,6 @@ void BKPlayLayer::setupHasCompleted() {
     LMINFO("Startposes found in the current level: {}", startposeAmount);
 
     PlayLayer::setupHasCompleted();
-    playThroughoutStartposes(m_fields->m_progression);
 }
 
 void BKPlayLayer::playThroughoutStartposes(LevelProgression* progression) {
@@ -46,9 +46,29 @@ void BKPlayLayer::playThroughoutStartposes(LevelProgression* progression) {
     LMDEBUG("Playing through startposes to obtain their percentage using game's measurements");
 
     progression->m_startPosPercents.clear();
+    int32_t lastPercent = -1.0f;
+
     for (auto& startpos : m_fields->m_startPoses) {
+        bool timedOut = true;
         setStartPosObject(startpos);
         resetLevel();
-        progression->m_startPosPercents.push_back(getCurrentPercentInt());
+        
+        // basically timeout unless startpos switches on difficult to render levels
+        for (uint32_t i = 0; i < STARTPOS_SWITCH_TIMEOUT_MS; i += STARTPOS_SWITCH_SLEEP_DURATION_MS) {
+            if (lastPercent != getCurrentPercentInt()) {
+                timedOut = false;
+                lastPercent = getCurrentPercentInt();
+                break;
+            }
+
+            std::this_thread::sleep_for(std::chrono::milliseconds(STARTPOS_SWITCH_SLEEP_DURATION_MS));
+        }
+
+        if (timedOut) {
+            LMERROR("Timed out while seeking startposes.. (buy a new computer)");
+            break;
+        }
+
+        progression->m_startPosPercents.push_back(lastPercent);
     }
 }

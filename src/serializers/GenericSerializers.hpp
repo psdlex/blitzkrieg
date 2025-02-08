@@ -13,8 +13,8 @@ struct matjson::Serialize<ProgressBestRun> {
 	static Result<ProgressBestRun> fromJson(const matjson::Value& value)
 	{
 		ProgressBestRun info;
-		GEODE_UNWRAP_INTO(info.m_fromPercent, value["fromPercent"].as<double>());
-		GEODE_UNWRAP_INTO(info.m_toPercent, value["toPercent"].as<double>());
+		GEODE_UNWRAP_INTO(info.m_fromPercent, value["fromPercent"].as<float>());
+		GEODE_UNWRAP_INTO(info.m_toPercent, value["toPercent"].as<float>());
 
 		return Ok(info);
 	}
