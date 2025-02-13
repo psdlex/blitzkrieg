@@ -47,8 +47,6 @@ protected:
     void onCheckImpl(CCObject* sender) override;
     void onProgressCheck(ProgressNode* node, bool checked);
 
-    bool areAllNodesChecked();
-
 public:
     void setEnabled(bool isTrue);
     void setPassed(bool isTrue, bool setToChildren, bool reverse = true);

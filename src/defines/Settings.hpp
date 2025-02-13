@@ -12,4 +12,10 @@
 #define DEBUG_TYPE_ERRORSANDWARNS "Errors & Warnings"
 #define DEBUG_TYPE_DESCRIPTIVE "Descriptive"
 
+#define SFX_ENABLED_SETTING "sfx-enabled"
+#define SFX_VOLUME_SETTING "sfx-volume"
+#define SFX_USE_CUSTOM_SOUNDS_SETTING "sfx-use-custom-sounds"
+#define SFX_PROGRESS_PATH_SETTING "sfx-progress-path"
+#define SFX_STAGE_PATH_SETTING "sfx-stage-path"
+
 #endif // SETTINGS_DEFINES_HPP

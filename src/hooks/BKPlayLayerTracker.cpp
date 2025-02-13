@@ -2,6 +2,7 @@
 #include "../managers/LevelProgressionManager.hpp"
 #include "../managers/LogManager.hpp"
 #include "../managers/SettingsManager.hpp"
+#include "../managers/SfxManager.hpp"
 
 using namespace managers;
 
@@ -87,6 +88,7 @@ void BKPlayLayerTracker::levelComplete() {
 
 void BKPlayLayerTracker::processProgress(float toPercent) {
     auto currentProgress = m_fields->m_currentProgress;
+    bool playProgressSound = false;
 
     if (currentProgress == nullptr) {
         return;
@@ -94,8 +96,11 @@ void BKPlayLayerTracker::processProgress(float toPercent) {
 
     // increasing pass amount
     if (currentProgress->m_toPercent <= static_cast<int>(toPercent)) {
+        if (currentProgress->m_isPassed == false) {
+            playProgressSound = true;
+        }
+
         currentProgress->m_passAmount++;
-        
         if (m_fields->m_autoCheck == true) {
             currentProgress->m_isPassed = true;
         }
@@ -112,9 +117,17 @@ void BKPlayLayerTracker::processProgress(float toPercent) {
         currentProgress->m_attemptsToPass = m_level->m_attempts;
     }
 
-    // checking  stage if all progresses are passed
-    if (m_fields->m_currentStage->allProgressesPassed()) {
-        m_fields->m_currentStage->m_isPassed = true;
+    // checking stage if all progresses are passed
+    if (m_fields->m_autoCheck == true && m_fields->m_currentStage->allProgressesPassed()) {
+        if (m_fields->m_currentStage->m_isPassed == false) {
+            m_fields->m_currentStage->m_isPassed = true;
+            playProgressSound = false;
+            SFX_PLAY_STAGE_PASSED();
+        }
+    }
+
+    if (playProgressSound) {
+        SFX_PLAY_PROGRESS_PASSED();
     }
 
     saveProgression();

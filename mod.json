@@ -16,9 +16,13 @@
 	"resources": {
 		"spritesheets": {
 			"BlitzKrieg": [
-				"resources/*.png"
+				"resources/spritesheet/*.png"
 			]
-		}
+		},
+
+		"files": [
+			"resources/sfx/*.ogg"
+		]
 	},
 
 	"dependencies": [
@@ -99,6 +103,76 @@
 			"one-of": [ "Dont Send", "Every 30 Minutes", "Every 60 Minutes", "Every 3 Hours", "Every 6 Hours", "Every 12 Hours", "Every 24 Hours" ]
 		},
 
+
+		
+		"sfx-settings": {
+			"type": "title",
+			"name": "SFX Settings"
+		},
+
+		"sfx-enabled": {
+			"name": "Use SFX's",
+			"type": "bool",
+			"default": true,
+			"requires-restart": false,
+			"description": "Use SFX's upon certain events during progression!"
+		},
+
+		"sfx-volume": {
+			"name": "SFX Volume",
+			"type": "int",
+			"min": 1,
+			"max": 100,
+			"default": 75,
+			"requires-restart": false,
+			"description": "Volume of the sound effects!"
+		},
+
+		"sfx-use-custom-sounds": {
+			"name": "Use Custom SFX's",
+			"type": "bool",
+			"default": false,
+			"requires-restart": true,
+			"description": "Use custom sounds for the SFX's!"
+		},
+
+		"sfx-progress-path": {
+			"name": "Progress-Pass SFX",
+			"type": "file",
+			"description": "Path for the Progress-Pass sound effect.\n<cr>Requires restarting the game to apply</c>",
+			"enable-if": "sfx-enabled && sfx-use-custom-sounds",
+			"default": {
+				"android": "", "mac": "", "win": "", "ios": ""
+			},
+			"control": {
+				"dialog": "open",
+				"filters": [
+					{
+						"files": ["*.mp3", "*.ogg"],
+						"description": "Sound Files"
+					}
+				]
+			}
+		},
+
+		"sfx-stage-path": {
+			"name": "Stage-Pass SFX",
+			"type": "file",
+			"description": "Path for the Stage-Pass sound effect.\n<cr>Requires restarting the game to apply</c>",
+			"enable-if": "sfx-enabled && sfx-use-custom-sounds",
+			"default": {
+				"android": "", "mac": "", "win": "", "ios": ""
+			},
+			"control": {
+				"dialog": "open",
+				"filters": [
+					{
+						"files": ["*.mp3", "*.ogg"],
+						"description": "Sound Files"
+					}
+				]
+			}
+		},
 
 
 		"debug-settings": {

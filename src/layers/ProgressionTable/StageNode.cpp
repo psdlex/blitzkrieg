@@ -154,7 +154,7 @@ void StageNode::onCheckImpl(CCObject* sender) {
     }
 
     bool toggled = !toggler->isToggled();
-    if (toggled == true && !areAllNodesChecked()) {
+    if (toggled == true && !m_progressionStage->allProgressesPassed()) {
         toggler->m_toggled = !(false); // reverse again
         return;
     }
@@ -204,15 +204,4 @@ void StageNode::setPassed(bool isTrue, bool setToChildren, bool reverse) {
 void StageNode::setActive(bool isTrue) {
     LMDEBUG("Changing state 'active' for stage {}: {}", m_progressionStage->m_stage, isTrue);
     m_progressionStage->m_isActive = isTrue;
-}
-
-bool StageNode::areAllNodesChecked() {
-    LMDEBUG("Checking if all progresses are checked");
-
-    bool result = true;
-    for (auto& node : m_progressNodes) {
-        result = result && node->isChecked();
-    }
-
-    return result;
 }

@@ -11,13 +11,15 @@ using namespace geode::prelude;
 
 namespace managers {
     class SettingsManager : public SingletonBase<SettingsManager>, public Initializable {
+        #define GetSettingValue Mod::get()->getSettingValue
         #define GetBoolSetting Mod::get()->getSettingValue<bool>
         #define GetStringSetting Mod::get()->getSettingValue<std::string>
 
         friend class SingletonBase<SettingsManager>;
 
     private:
-        std::vector<std::function<void(DSFlags)>> m_debugSettingsChangedListeners = {};
+        std::vector<std::function<void(DSFlags)>> m_debugSettingsListeners = {};
+        std::vector<std::function<void(SfxSettings)>> m_sfxSettingsListeners = {};
 
     public:
         Result<> init() override {
@@ -34,13 +36,27 @@ namespace managers {
             return flags;
         }
 
+        SfxSettings getSfxSettings() {
+            SfxSettings settings;
+            settings.m_enabled = GetBoolSetting(SFX_ENABLED_SETTING);
+            settings.m_useCustom = GetBoolSetting(SFX_USE_CUSTOM_SOUNDS_SETTING);
+            settings.m_volume = GetSettingValue<int>(SFX_VOLUME_SETTING) / 100.0f;
+            settings.m_progressSfxPath = GetSettingValue<std::filesystem::path>(SFX_PROGRESS_PATH_SETTING);
+            settings.m_stageSfxPath = GetSettingValue<std::filesystem::path>(SFX_STAGE_PATH_SETTING);
+            return settings;
+        }
+
         DSFlags getDebugSettings() {
             auto setting = GetStringSetting(DEBUG_TYPE_SETTING);
             return getDebugSettingsImpl(setting);
         }
 
         void listenForDebugSettingsChanged(std::function<void(DSFlags)> func) {
-            m_debugSettingsChangedListeners.push_back(func);
+            m_debugSettingsListeners.push_back(func);
+        }
+
+        void listenForSfxSettingsChanged(std::function<void(SfxSettings)> func) {
+            m_sfxSettingsListeners.push_back(func);
         }
 
     private:
@@ -59,10 +75,26 @@ namespace managers {
     }
 
     inline void SettingsManager::setupSettingsListeners() {
+        // debugs settings
         listenForSettingChangesV3(DEBUG_TYPE_SETTING, [this](std::string newVal) {
             auto result = getDebugSettingsImpl(newVal);
-            for (auto& func : m_debugSettingsChangedListeners) {
+            for (auto& func : m_debugSettingsListeners) {
                 func(result);
+            }
+        });
+
+        // sfx settings
+        listenForSettingChangesV3(SFX_ENABLED_SETTING, [this](bool newVal) {
+            for (auto& func : m_sfxSettingsListeners) {
+                func(getSfxSettings());
+            }
+
+        });
+
+        listenForSettingChangesV3<int64_t>(SFX_VOLUME_SETTING, [this](auto newVal) {
+            log::warn("sex");
+            for (auto& func : m_sfxSettingsListeners) {
+                func(getSfxSettings());
             }
         });
     }
