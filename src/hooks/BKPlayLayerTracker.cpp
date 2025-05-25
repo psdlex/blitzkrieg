@@ -120,7 +120,8 @@ void BKPlayLayerTracker::processProgress(float toPercent) {
     // checking stage if all progresses are passed
     if (m_fields->m_autoCheck == true && m_fields->m_currentStage->allProgressesPassed()) {
         if (m_fields->m_currentStage->m_isPassed == false) {
-            m_fields->m_currentStage->m_isPassed = true;
+            m_fields->m_progression->setStagePassed(m_fields->m_currentStage);
+            
             playProgressSound = false;
             SFX_PLAY_STAGE_PASSED();
         }

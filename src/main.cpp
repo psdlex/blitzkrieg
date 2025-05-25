@@ -7,6 +7,8 @@
 
 using namespace geode::prelude;
 
+void setupNotificationMenu();
+
 $on_mod(Loaded) {
     std::array<Initializable*, 5> initializables = {
         managers::PathManager::get(),
@@ -24,5 +26,15 @@ $on_mod(Loaded) {
         }
     }
 
+    setupNotificationMenu();
     log::info("Blitzkrieg initialized");
+}
+
+void setupNotificationMenu() {
+    auto node = CCLayerColor::create(ccc4(255,0,0,100));
+    node->ignoreAnchorPointForPosition(false);
+    node->setContentSize({50, 50});
+    node->setAnchorPoint({ 0.5, 0.5 });
+
+    SceneManager::get()->keepAcrossScenes(node);
 }
